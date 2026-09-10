@@ -31,6 +31,20 @@ export const projects: Project[] = [
   { id: "p4", slug: "nude", title: "Nude", style: "Soft glam", dateLabel: "czerwiec 2026", description: "Rozswietlony soft glam z roznymi tonami rozu na policzku i powiece.", cover: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1200&q=80", coverAlt: "Kosmetyki i pedzle ulozone na stole", ratio: "portrait", products: ["Rose pigment", "Glass highlighter"], public: true }
 ];
 
+export type Model = {
+  id: string;
+  name: string;
+  cover: string;
+  coverAlt: string;
+};
+
+export const models: Model[] = [
+  { id: "m1", name: "Klaudia", cover: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?auto=format&fit=crop&w=900&q=80", coverAlt: "Portret modelki Klaudii" },
+  { id: "m2", name: "Weronika", cover: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=900&q=80", coverAlt: "Portret modelki Weroniki" },
+  { id: "m3", name: "Joanna", cover: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80", coverAlt: "Portret modelki Joanny" },
+  { id: "m4", name: "Natalia", cover: "https://images.unsplash.com/photo-1541823709867-1b206113eafd?auto=format&fit=crop&w=900&q=80", coverAlt: "Portret modelki Natalii" }
+];
+
 export const studioStats = { privateProjects: 7, publishedProjects: 4, cosmetics: 38, models: 12, packingProgress: "8/17" };
 export const cosmetics = [
   { name: "Skin Veil 03", brand: "Luma", type: "Podklad", usedIn: 3 },

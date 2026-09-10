@@ -1,13 +1,33 @@
+import Image from "next/image";
 import { Header } from "@/components/Header";
+import { models } from "@/lib/data";
 
 export default function ModelkiPage() {
   return (
     <main>
       <Header active="modelki" />
-      <section className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 lg:px-8">
-        <p className="mb-2 text-xs uppercase text-accent">Modelki</p>
-        <h1 className="font-serif text-5xl font-semibold leading-none">Ta sekcja jest w przygotowaniu.</h1>
-        <p className="mt-4 text-base leading-7 text-muted">Wkrotce pojawia sie tu modelki wspolpracujace przy sesjach zdjeciowych.</p>
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <p className="mb-2 text-xs uppercase text-accent">Wspolpraca</p>
+        <h1 className="mb-8 font-serif text-5xl font-semibold leading-none">Modelki</h1>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+          {models.map((model, index) => (
+            <article key={model.id} className="overflow-hidden rounded border border-ink/10 bg-white/35">
+              <div className="relative aspect-[4/5] bg-soft-accent">
+                <Image
+                  src={model.cover}
+                  alt={model.coverAlt}
+                  fill
+                  priority={index < 2}
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-3">
+                <h2 className="font-serif text-xl font-semibold leading-none">{model.name}</h2>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
     </main>
   );
