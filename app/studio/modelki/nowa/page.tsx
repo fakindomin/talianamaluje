@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { PhotoUploadField } from "@/components/PhotoUploadField";
 import { StudioSidebar } from "@/components/StudioSidebar";
 import { addModel } from "@/lib/actions";
 
@@ -15,10 +16,7 @@ export default function NowaModelkaPage() {
             Imie*
             <input name="name" required className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. Klaudia" />
           </label>
-          <label className="block text-sm">
-            Zdjecie*
-            <input type="file" name="cover" accept="image/*" required className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
-          </label>
+          <PhotoUploadField name="coverUrl" folder="models" label="Zdjecie*" />
           <button type="submit" className="w-full bg-accent px-4 py-3 text-sm font-medium text-white sm:w-auto">Zapisz modelke</button>
         </form>
       </section>

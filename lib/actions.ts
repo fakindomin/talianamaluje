@@ -13,26 +13,8 @@ function slugify(input: string) {
     .replace(/(^-|-$)/g, "") || "makijaz";
 }
 
-async function uploadCover(file: File, folder: "projects" | "models") {
-  const supabase = getSupabase();
-  const ext = file.name.split(".").pop() || "jpg";
-  const path = `${folder}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("media").upload(path, file, {
-    contentType: file.type || "image/jpeg",
-    upsert: false
-  });
-  if (error) throw new Error(`Upload zdjecia nie powiodl sie: ${error.message}`);
-  const { data } = supabase.storage.from("media").getPublicUrl(path);
-  return data.publicUrl;
-}
-
-async function uploadPhotos(files: File[], folder: "projects" | "models") {
-  const urls: string[] = [];
-  for (const file of files) {
-    if (file.size === 0) continue;
-    urls.push(await uploadCover(file, folder));
-  }
-  return urls;
+function getPhotoUrls(formData: FormData, field: string): string[] {
+  return formData.getAll(field).map((v) => String(v)).filter((url) => url.trim().length > 0);
 }
 
 async function resolveModelId(formData: FormData, fallbackCoverUrl: string | null): Promise<string | null> {
@@ -64,13 +46,12 @@ export async function addProject(formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const productsRaw = String(formData.get("products") || "").trim();
   const isPublic = formData.get("isPublic") === "on";
-  const files = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
+  const photoUrls = getPhotoUrls(formData, "photoUrls");
 
-  if (!title || files.length === 0) {
+  if (!title || photoUrls.length === 0) {
     throw new Error("Tytul i przynajmniej jedno zdjecie sa wymagane.");
   }
 
-  const photoUrls = await uploadPhotos(files, "projects");
   const modelId = await resolveModelId(formData, photoUrls[0]);
   const products = productsRaw ? productsRaw.split(",").map((p) => p.trim()).filter(Boolean) : [];
   const slug = slugify(title);
@@ -102,13 +83,11 @@ export async function addProject(formData: FormData) {
 
 export async function addModel(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
-  const file = formData.get("cover") as File | null;
+  const coverUrl = String(formData.get("coverUrl") || "").trim();
 
-  if (!name || !file || file.size === 0) {
+  if (!name || !coverUrl) {
     throw new Error("Imie i zdjecie sa wymagane.");
   }
-
-  const coverUrl = await uploadCover(file, "models");
 
   const supabase = getSupabase();
   const { error } = await supabase.from("models").insert({
@@ -130,7 +109,7 @@ export async function updateProject(id: string, formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const productsRaw = String(formData.get("products") || "").trim();
   const isPublic = formData.get("isPublic") === "on";
-  const files = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
+  const newPhotoUrls = getPhotoUrls(formData, "photoUrls");
 
   if (!title) throw new Error("Tytul jest wymagany.");
 
@@ -146,10 +125,9 @@ export async function updateProject(id: string, formData: FormData) {
 
   const supabase = getSupabase();
 
-  if (files.length > 0) {
-    const newUrls = await uploadPhotos(files, "projects");
+  if (newPhotoUrls.length > 0) {
     const { data: existing } = await supabase.from("projects").select("photo_urls").eq("id", id).maybeSingle();
-    const combined = [...(existing?.photo_urls ?? []), ...newUrls];
+    const combined = [...(existing?.photo_urls ?? []), ...newPhotoUrls];
     update.photo_urls = combined;
     update.cover_url = combined[0];
     update.cover_alt = title;
@@ -183,14 +161,12 @@ export async function deleteProject(id: string) {
 
 export async function updateModel(id: string, formData: FormData) {
   const name = String(formData.get("name") || "").trim();
-  const file = formData.get("cover") as File | null;
+  const coverUrl = String(formData.get("coverUrl") || "").trim();
 
   if (!name) throw new Error("Imie jest wymagane.");
 
   const update: Record<string, unknown> = { name, cover_alt: `Portret modelki ${name}` };
-  if (file && file.size > 0) {
-    update.cover_url = await uploadCover(file, "models");
-  }
+  if (coverUrl) update.cover_url = coverUrl;
 
   const supabase = getSupabase();
   const { error } = await supabase.from("models").update(update).eq("id", id);

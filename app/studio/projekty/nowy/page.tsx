@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { PhotoUploadField } from "@/components/PhotoUploadField";
 import { StudioSidebar } from "@/components/StudioSidebar";
 import { addProject } from "@/lib/actions";
 import { getModels } from "@/lib/db";
@@ -47,10 +48,7 @@ export default async function NowyProjektPage() {
             Albo nowa modelka (jesli jej nie ma na liscie powyzej)
             <input name="newModelName" className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. Klaudia" />
           </label>
-          <label className="block text-sm">
-            Zdjecia* (mozna wybrac kilka naraz — pierwsze bedzie miniatura)
-            <input type="file" name="photos" accept="image/*" multiple required className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
-          </label>
+          <PhotoUploadField name="photoUrls" folder="projects" multiple label="Zdjecia* (mozna wybrac kilka naraz — pierwsze bedzie miniatura)" />
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="isPublic" defaultChecked className="h-4 w-4" />
             Widoczny publicznie (Portfolio, Makijaze tematyczne)

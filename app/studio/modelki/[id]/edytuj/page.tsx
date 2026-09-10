@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { PhotoUploadField } from "@/components/PhotoUploadField";
 import { StudioSidebar } from "@/components/StudioSidebar";
 import { updateModel } from "@/lib/actions";
 import { getModelById } from "@/lib/db";
@@ -31,10 +32,7 @@ export default async function EdytujModelkePage({ params }: { params: Promise<{ 
             Imie*
             <input name="name" required defaultValue={model.name} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
           </label>
-          <label className="block text-sm">
-            Nowe zdjecie (zostaw puste, zeby zachowac obecne)
-            <input type="file" name="cover" accept="image/*" className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
-          </label>
+          <PhotoUploadField name="coverUrl" folder="models" label="Nowe zdjecie (zostaw puste, zeby zachowac obecne)" />
           <div className="flex flex-wrap gap-3">
             <button type="submit" className="bg-accent px-4 py-3 text-sm font-medium text-white">Zapisz zmiany</button>
             <Link href={`/studio/modelki/${model.id}/usun`} className="border border-ink/15 px-4 py-3 text-sm text-accent">Usun modelke</Link>
