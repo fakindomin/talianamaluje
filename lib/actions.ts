@@ -26,6 +26,37 @@ async function uploadCover(file: File, folder: "projects" | "models") {
   return data.publicUrl;
 }
 
+async function uploadPhotos(files: File[], folder: "projects" | "models") {
+  const urls: string[] = [];
+  for (const file of files) {
+    if (file.size === 0) continue;
+    urls.push(await uploadCover(file, folder));
+  }
+  return urls;
+}
+
+async function resolveModelId(formData: FormData, fallbackCoverUrl: string | null): Promise<string | null> {
+  const newModelName = String(formData.get("newModelName") || "").trim();
+  const selectedModelId = String(formData.get("modelId") || "").trim();
+
+  if (newModelName) {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("models")
+      .insert({
+        name: newModelName,
+        cover_url: fallbackCoverUrl ?? "",
+        cover_alt: `Portret modelki ${newModelName}`
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(`Nie udalo sie utworzyc nowej modelki: ${error.message}`);
+    return data.id;
+  }
+
+  return selectedModelId || null;
+}
+
 export async function addProject(formData: FormData) {
   const title = String(formData.get("title") || "").trim();
   const style = String(formData.get("style") || "").trim();
@@ -33,13 +64,14 @@ export async function addProject(formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const productsRaw = String(formData.get("products") || "").trim();
   const isPublic = formData.get("isPublic") === "on";
-  const file = formData.get("cover") as File | null;
+  const files = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
 
-  if (!title || !file || file.size === 0) {
-    throw new Error("Tytul i zdjecie sa wymagane.");
+  if (!title || files.length === 0) {
+    throw new Error("Tytul i przynajmniej jedno zdjecie sa wymagane.");
   }
 
-  const coverUrl = await uploadCover(file, "projects");
+  const photoUrls = await uploadPhotos(files, "projects");
+  const modelId = await resolveModelId(formData, photoUrls[0]);
   const products = productsRaw ? productsRaw.split(",").map((p) => p.trim()).filter(Boolean) : [];
   const slug = slugify(title);
 
@@ -50,17 +82,21 @@ export async function addProject(formData: FormData) {
     style: style || "Bez kategorii",
     date_label: dateLabel || new Date().toLocaleDateString("pl-PL", { month: "long", year: "numeric" }),
     description,
-    cover_url: coverUrl,
+    cover_url: photoUrls[0],
     cover_alt: title,
+    photo_urls: photoUrls,
     products,
-    is_public: isPublic
+    is_public: isPublic,
+    model_id: modelId
   });
   if (error) throw new Error(`Nie udalo sie zapisac projektu: ${error.message}`);
 
   revalidatePath("/");
   revalidatePath("/tematyczne");
+  revalidatePath("/modelki");
   revalidatePath("/@nina-kaminska");
   revalidatePath("/studio");
+  revalidatePath("/studio/modelki");
   redirect("/studio");
 }
 
@@ -94,7 +130,7 @@ export async function updateProject(id: string, formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const productsRaw = String(formData.get("products") || "").trim();
   const isPublic = formData.get("isPublic") === "on";
-  const file = formData.get("cover") as File | null;
+  const files = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
 
   if (!title) throw new Error("Tytul jest wymagany.");
 
@@ -108,19 +144,28 @@ export async function updateProject(id: string, formData: FormData) {
     is_public: isPublic
   };
 
-  if (file && file.size > 0) {
-    update.cover_url = await uploadCover(file, "projects");
+  const supabase = getSupabase();
+
+  if (files.length > 0) {
+    const newUrls = await uploadPhotos(files, "projects");
+    const { data: existing } = await supabase.from("projects").select("photo_urls").eq("id", id).maybeSingle();
+    const combined = [...(existing?.photo_urls ?? []), ...newUrls];
+    update.photo_urls = combined;
+    update.cover_url = combined[0];
     update.cover_alt = title;
   }
 
-  const supabase = getSupabase();
+  update.model_id = await resolveModelId(formData, (update.cover_url as string) ?? null);
+
   const { error } = await supabase.from("projects").update(update).eq("id", id);
   if (error) throw new Error(`Nie udalo sie zaktualizowac projektu: ${error.message}`);
 
   revalidatePath("/");
   revalidatePath("/tematyczne");
+  revalidatePath("/modelki");
   revalidatePath("/@nina-kaminska");
   revalidatePath("/studio");
+  revalidatePath("/studio/modelki");
   redirect("/studio");
 }
 

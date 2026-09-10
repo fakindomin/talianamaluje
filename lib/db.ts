@@ -19,8 +19,11 @@ export type Project = {
   description: string;
   cover: string;
   coverAlt: string;
+  photos: string[];
   products: string[];
   public: boolean;
+  modelId: string | null;
+  modelName: string | null;
 };
 
 export type Model = {
@@ -30,14 +33,28 @@ export type Model = {
   coverAlt: string;
 };
 
-export async function getProjects(): Promise<Project[]> {
-  const supabase = getSupabase();
-  const { data, error } = await supabase
-    .from("projects")
-    .select("id, slug, title, style, date_label, description, cover_url, cover_alt, products, is_public")
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(`Nie udalo sie pobrac projektow: ${error.message}`);
-  return (data ?? []).map((row) => ({
+const PROJECT_SELECT = "id, slug, title, style, date_label, description, cover_url, cover_alt, photo_urls, products, is_public, model_id, models(name)";
+
+type ProjectRow = {
+  id: string;
+  slug: string;
+  title: string;
+  style: string;
+  date_label: string;
+  description: string;
+  cover_url: string;
+  cover_alt: string;
+  photo_urls: string[] | null;
+  products: string[] | null;
+  is_public: boolean;
+  model_id: string | null;
+  models: { name: string } | { name: string }[] | null;
+};
+
+function mapProject(row: ProjectRow): Project {
+  const modelName = Array.isArray(row.models) ? row.models[0]?.name ?? null : row.models?.name ?? null;
+  const photos = row.photo_urls && row.photo_urls.length > 0 ? row.photo_urls : [row.cover_url];
+  return {
     id: row.id,
     slug: row.slug,
     title: row.title,
@@ -46,32 +63,34 @@ export async function getProjects(): Promise<Project[]> {
     description: row.description,
     cover: row.cover_url,
     coverAlt: row.cover_alt,
+    photos,
     products: row.products ?? [],
-    public: row.is_public
-  }));
+    public: row.is_public,
+    modelId: row.model_id,
+    modelName
+  };
+}
+
+export async function getProjects(): Promise<Project[]> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("projects")
+    .select(PROJECT_SELECT)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`Nie udalo sie pobrac projektow: ${error.message}`);
+  return (data ?? []).map((row) => mapProject(row as unknown as ProjectRow));
 }
 
 export async function getProjectById(id: string): Promise<Project | null> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("projects")
-    .select("id, slug, title, style, date_label, description, cover_url, cover_alt, products, is_public")
+    .select(PROJECT_SELECT)
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`Nie udalo sie pobrac projektu: ${error.message}`);
   if (!data) return null;
-  return {
-    id: data.id,
-    slug: data.slug,
-    title: data.title,
-    style: data.style,
-    dateLabel: data.date_label,
-    description: data.description,
-    cover: data.cover_url,
-    coverAlt: data.cover_alt,
-    products: data.products ?? [],
-    public: data.is_public
-  };
+  return mapProject(data as unknown as ProjectRow);
 }
 
 export async function getModelById(id: string): Promise<Model | null> {
