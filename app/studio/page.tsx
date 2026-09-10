@@ -19,7 +19,7 @@ export default function StudioPage() {
       <aside className="border-b border-ink/10 bg-white/35 lg:min-h-screen lg:border-b-0 lg:border-r">
         <div className="flex h-16 items-center justify-between px-4 lg:h-auto lg:block lg:p-5">
           <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-semibold">
-            <Image src="/logo-mark.webp" alt="" width={72} height={55} className="h-8 w-auto" />
+            <Image src="/logo-mark.webp" alt="" width={360} height={277} className="h-8 w-auto" />
             talianamaluje
           </Link>
           <span className="text-xs uppercase text-accent lg:mt-2 lg:block">Studio</span>

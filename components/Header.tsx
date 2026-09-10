@@ -13,9 +13,10 @@ const categoryTabs: { key: CategoryTab; label: string; href: string }[] = [
 export function Header({ active }: { active?: CategoryTab } = {}) {
   return (
     <header className="sticky top-0 z-20 border-b border-ink/10 bg-canvas/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-semibold tracking-normal">
-          <Image src="/logo-mark.webp" alt="talianamaluje" width={72} height={55} priority className="h-9 w-auto" />
+      <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center gap-3 font-serif text-2xl font-semibold tracking-normal">
+          <Image src="/logo-mark.webp" alt="" width={360} height={277} priority className="h-16 w-auto" />
+          talianamaluje
         </Link>
         <nav className="flex items-center gap-2 text-sm text-muted">
           <Link className="px-3 py-2 hover:text-ink" href="/@nina-kaminska">Profil</Link>
