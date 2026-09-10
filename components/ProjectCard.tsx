@@ -33,8 +33,15 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
 
   return (
     <Link href={`/work/${project.slug}`} className="group block">
-      <article className="relative aspect-[4/5] overflow-hidden bg-soft-accent">
-        {photos.length > 1 && <style>{buildCrossfadeCss(keyframeName, photos.length)}</style>}
+      <div className="relative">
+        {photos.length > 1 && (
+          <>
+            <div aria-hidden className="absolute inset-0 translate-x-3 translate-y-3 -rotate-2 bg-soft-accent shadow-line" />
+            <div aria-hidden className="absolute inset-0 translate-x-1.5 translate-y-1.5 rotate-1 bg-[#F7EFEA] shadow-line" />
+          </>
+        )}
+        <article className="relative aspect-[4/5] overflow-hidden bg-soft-accent shadow-line">
+          {photos.length > 1 && <style>{buildCrossfadeCss(keyframeName, photos.length)}</style>}
         {photos.map((photo, index) => {
           const layerStyle: CSSProperties | undefined =
             photos.length > 1
@@ -66,7 +73,8 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
             <p className="mt-1 text-xs uppercase opacity-90" style={{ color: project.textColor }}>{project.style}</p>
           </div>
         </div>
-      </article>
+        </article>
+      </div>
     </Link>
   );
 }
