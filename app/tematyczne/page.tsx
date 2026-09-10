@@ -15,7 +15,7 @@ export default function TematycznePage() {
         {styles.map((style) => (
           <div key={style} className="mb-10">
             <h2 className="mb-4 text-sm font-medium uppercase text-muted">{style}</h2>
-            <div className="masonry columns-2 md:columns-3 xl:columns-4">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
               {publicProjects
                 .filter((project) => project.style === style)
                 .map((project, index) => <ProjectCard key={project.id} project={project} priority={index === 0} />)}

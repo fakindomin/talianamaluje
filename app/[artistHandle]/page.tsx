@@ -21,7 +21,7 @@ export default function ArtistProfile() {
             </div>
           </div>
         </div>
-        <div className="masonry mt-8 columns-2 md:columns-3 xl:columns-4">
+        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {projects.filter((project) => project.public).map((project) => <ProjectCard key={project.id} project={project} />)}
         </div>
       </section>
