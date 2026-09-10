@@ -4,6 +4,8 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { artist } from "@/lib/data";
 import { getProjects } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function ArtistProfile() {
   const projects = await getProjects();
   return (

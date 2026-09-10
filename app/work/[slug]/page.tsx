@@ -5,6 +5,8 @@ import { ArrowLeft } from "lucide-react";
 import { artist } from "@/lib/data";
 import { getProjects } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function WorkPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const projects = await getProjects();

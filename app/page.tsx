@@ -2,6 +2,8 @@ import { Header } from "@/components/Header";
 import { ProjectCard } from "@/components/ProjectCard";
 import { getProjects } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const projects = await getProjects();
   const publicProjects = projects.filter((project) => project.public);

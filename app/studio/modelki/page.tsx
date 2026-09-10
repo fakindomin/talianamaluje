@@ -3,6 +3,8 @@ import Link from "next/link";
 import { StudioSidebar } from "@/components/StudioSidebar";
 import { getModels } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function StudioModelkiPage() {
   const models = await getModels();
 

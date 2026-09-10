@@ -2,6 +2,8 @@ import Image from "next/image";
 import { Header } from "@/components/Header";
 import { getModels } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function ModelkiPage() {
   const models = await getModels();
   return (

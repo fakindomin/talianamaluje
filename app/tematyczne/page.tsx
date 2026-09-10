@@ -2,6 +2,8 @@ import Image from "next/image";
 import { Header } from "@/components/Header";
 import { getProjects } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function TematycznePage() {
   const projects = await getProjects();
   const publicProjects = projects.filter((project) => project.public);

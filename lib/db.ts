@@ -1,9 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 
 export function getSupabase() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY;
+  const url = process.env.SUPABASE_URL?.trim();
+  const key = process.env.SUPABASE_ANON_KEY?.trim();
   if (!url || !key) throw new Error("Brak konfiguracji Supabase (SUPABASE_URL / SUPABASE_ANON_KEY).");
+  if (!/^[\x00-\xFF]*$/.test(key)) {
+    throw new Error("SUPABASE_ANON_KEY zawiera nieprawidlowy znak (sprawdz czy wartosc zostala wklejona poprawnie, bez znakow specjalnych typu •).");
+  }
   return createClient(url, key);
 }
 

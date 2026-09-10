@@ -4,6 +4,8 @@ import { StudioSidebar } from "@/components/StudioSidebar";
 import { cosmetics, studioStats } from "@/lib/data";
 import { getProjects } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function StudioPage() {
   const projects = await getProjects();
   const publicCount = projects.filter((project) => project.public).length;
