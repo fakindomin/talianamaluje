@@ -2,10 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: light; background: #f7f2ee; }
+:root { color-scheme: light; background: #d9b9b0; }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; background: #f7f2ee; color: #242126; }
+body { margin: 0; background: #d9b9b0; color: #242126; }
 a { color: inherit; text-decoration: none; }
 button, input, textarea, select { font: inherit; }
 :focus-visible { outline: 2px solid #7b3046; outline-offset: 3px; }

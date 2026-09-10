@@ -5,7 +5,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        canvas: "#F7F2EE",
+        canvas: "#D9B9B0",
         ink: "#242126",
         muted: "#6F6870",
         accent: "#7B3046",
