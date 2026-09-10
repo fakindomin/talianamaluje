@@ -26,57 +26,64 @@ function buildCrossfadeCss(keyframeName: string, count: number) {
 
 export function ProjectCard({ project, priority = false }: { project: Project; priority?: boolean }) {
   const photos = project.photos;
+  const count = photos.length;
   const keyframeName = `cf-${project.id.replace(/[^a-zA-Z0-9]/g, "")}`;
   const slot = VISIBLE_SECONDS + FADE_SECONDS;
-  const total = slot * photos.length;
-  const projectOffset = photos.length > 1 ? hashOffsetSeconds(project.id, total) : 0;
+  const total = slot * count;
+  const projectOffset = count > 1 ? hashOffsetSeconds(project.id, total) : 0;
+  const backLayerCount = count >= 3 ? 2 : count === 2 ? 1 : 0;
+
+  function renderLayer(role: number, isFront: boolean) {
+    return photos.map((photo, index) => {
+      const slotIndex = (((index - role) % count) + count) % count;
+      const layerStyle: CSSProperties | undefined =
+        count > 1
+          ? ({
+              "--tile-anim-name": keyframeName,
+              "--tile-anim-duration": `${total}s`,
+              "--tile-anim-delay": `${slotIndex * slot - projectOffset}s`
+            } as CSSProperties)
+          : undefined;
+      return (
+        <div key={photo} className={`absolute inset-0 ${count > 1 ? "tile-crossfade" : ""}`} style={layerStyle}>
+          <div className="tile-kenburns h-full w-full">
+            <Image
+              src={photo}
+              alt={isFront ? project.coverAlt : ""}
+              fill
+              priority={isFront && priority && index === 0}
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+              className="object-cover"
+            />
+          </div>
+        </div>
+      );
+    });
+  }
 
   return (
     <Link href={`/work/${project.slug}`} className="group block">
       <div className="relative">
-        {photos.length > 1 && (
-          <>
-            <div aria-hidden className="absolute inset-0 translate-x-3 translate-y-3 -rotate-2 overflow-hidden rounded-md bg-soft-accent shadow-line">
-              <Image src={photos[2 % photos.length]} alt="" fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover" />
-            </div>
-            <div aria-hidden className="absolute inset-0 translate-x-1.5 translate-y-1.5 rotate-1 overflow-hidden rounded-md bg-[#F7EFEA] shadow-line">
-              <Image src={photos[1 % photos.length]} alt="" fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover" />
-            </div>
-          </>
+        {count > 1 && <style>{buildCrossfadeCss(keyframeName, count)}</style>}
+        {backLayerCount >= 2 && (
+          <div aria-hidden className="absolute inset-0 translate-x-3 translate-y-3 -rotate-2 overflow-hidden rounded-md shadow-line">
+            {renderLayer(2, false)}
+          </div>
+        )}
+        {backLayerCount >= 1 && (
+          <div aria-hidden className="absolute inset-0 translate-x-1.5 translate-y-1.5 rotate-1 overflow-hidden rounded-md shadow-line">
+            {renderLayer(1, false)}
+          </div>
         )}
         <article className="relative aspect-[4/5] overflow-hidden rounded-md bg-soft-accent shadow-line">
-          {photos.length > 1 && <style>{buildCrossfadeCss(keyframeName, photos.length)}</style>}
-        {photos.map((photo, index) => {
-          const layerStyle: CSSProperties | undefined =
-            photos.length > 1
-              ? ({
-                  "--tile-anim-name": keyframeName,
-                  "--tile-anim-duration": `${total}s`,
-                  "--tile-anim-delay": `${index * slot - projectOffset}s`
-                } as CSSProperties)
-              : undefined;
-          return (
-            <div key={photo} className={`absolute inset-0 ${photos.length > 1 ? "tile-crossfade" : ""}`} style={layerStyle}>
-              <div className="tile-kenburns h-full w-full">
-                <Image
-                  src={photo}
-                  alt={project.coverAlt}
-                  fill
-                  priority={priority && index === 0}
-                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                  className="object-cover"
-                />
-              </div>
+          {renderLayer(0, true)}
+          <div className="pointer-events-none absolute inset-0 tile-text-drift">
+            <div className="absolute right-3 top-3 text-xs" style={{ color: project.textColor }}>{project.dateLabel}</div>
+            <div className="absolute inset-x-3 bottom-3">
+              <h2 className="font-serif text-2xl font-semibold leading-none" style={{ color: project.textColor }}>{project.title}</h2>
+              <p className="mt-1 text-xs uppercase opacity-90" style={{ color: project.textColor }}>{project.style}</p>
             </div>
-          );
-        })}
-        <div className="pointer-events-none absolute inset-0 tile-text-drift">
-          <div className="absolute right-3 top-3 text-xs" style={{ color: project.textColor }}>{project.dateLabel}</div>
-          <div className="absolute inset-x-3 bottom-3">
-            <h2 className="font-serif text-2xl font-semibold leading-none" style={{ color: project.textColor }}>{project.title}</h2>
-            <p className="mt-1 text-xs uppercase opacity-90" style={{ color: project.textColor }}>{project.style}</p>
           </div>
-        </div>
         </article>
       </div>
     </Link>
