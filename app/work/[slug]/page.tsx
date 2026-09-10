@@ -1,11 +1,27 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { artist } from "@/lib/data";
 import { getProjects } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const projects = await getProjects();
+  const project = projects.find((item) => item.slug === slug && item.public);
+  if (!project) return {};
+  const title = project.title;
+  const description = project.description || `${project.style} — realizacja ${artist.displayName}.`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, images: [{ url: project.cover }] },
+    twitter: { card: "summary_large_image", title, description, images: [project.cover] }
+  };
+}
 
 export default async function WorkPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

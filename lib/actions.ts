@@ -86,3 +86,82 @@ export async function addModel(formData: FormData) {
   revalidatePath("/studio/modelki");
   redirect("/studio/modelki");
 }
+
+export async function updateProject(id: string, formData: FormData) {
+  const title = String(formData.get("title") || "").trim();
+  const style = String(formData.get("style") || "").trim();
+  const dateLabel = String(formData.get("dateLabel") || "").trim();
+  const description = String(formData.get("description") || "").trim();
+  const productsRaw = String(formData.get("products") || "").trim();
+  const isPublic = formData.get("isPublic") === "on";
+  const file = formData.get("cover") as File | null;
+
+  if (!title) throw new Error("Tytul jest wymagany.");
+
+  const products = productsRaw ? productsRaw.split(",").map((p) => p.trim()).filter(Boolean) : [];
+  const update: Record<string, unknown> = {
+    title,
+    style: style || "Bez kategorii",
+    date_label: dateLabel,
+    description,
+    products,
+    is_public: isPublic
+  };
+
+  if (file && file.size > 0) {
+    update.cover_url = await uploadCover(file, "projects");
+    update.cover_alt = title;
+  }
+
+  const supabase = getSupabase();
+  const { error } = await supabase.from("projects").update(update).eq("id", id);
+  if (error) throw new Error(`Nie udalo sie zaktualizowac projektu: ${error.message}`);
+
+  revalidatePath("/");
+  revalidatePath("/tematyczne");
+  revalidatePath("/@nina-kaminska");
+  revalidatePath("/studio");
+  redirect("/studio");
+}
+
+export async function deleteProject(id: string) {
+  const supabase = getSupabase();
+  const { error } = await supabase.from("projects").delete().eq("id", id);
+  if (error) throw new Error(`Nie udalo sie usunac projektu: ${error.message}`);
+
+  revalidatePath("/");
+  revalidatePath("/tematyczne");
+  revalidatePath("/@nina-kaminska");
+  revalidatePath("/studio");
+  redirect("/studio");
+}
+
+export async function updateModel(id: string, formData: FormData) {
+  const name = String(formData.get("name") || "").trim();
+  const file = formData.get("cover") as File | null;
+
+  if (!name) throw new Error("Imie jest wymagane.");
+
+  const update: Record<string, unknown> = { name, cover_alt: `Portret modelki ${name}` };
+  if (file && file.size > 0) {
+    update.cover_url = await uploadCover(file, "models");
+  }
+
+  const supabase = getSupabase();
+  const { error } = await supabase.from("models").update(update).eq("id", id);
+  if (error) throw new Error(`Nie udalo sie zaktualizowac modelki: ${error.message}`);
+
+  revalidatePath("/modelki");
+  revalidatePath("/studio/modelki");
+  redirect("/studio/modelki");
+}
+
+export async function deleteModel(id: string) {
+  const supabase = getSupabase();
+  const { error } = await supabase.from("models").delete().eq("id", id);
+  if (error) throw new Error(`Nie udalo sie usunac modelki: ${error.message}`);
+
+  revalidatePath("/modelki");
+  revalidatePath("/studio/modelki");
+  redirect("/studio/modelki");
+}

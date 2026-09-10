@@ -51,6 +51,41 @@ export async function getProjects(): Promise<Project[]> {
   }));
 }
 
+export async function getProjectById(id: string): Promise<Project | null> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("projects")
+    .select("id, slug, title, style, date_label, description, cover_url, cover_alt, products, is_public")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(`Nie udalo sie pobrac projektu: ${error.message}`);
+  if (!data) return null;
+  return {
+    id: data.id,
+    slug: data.slug,
+    title: data.title,
+    style: data.style,
+    dateLabel: data.date_label,
+    description: data.description,
+    cover: data.cover_url,
+    coverAlt: data.cover_alt,
+    products: data.products ?? [],
+    public: data.is_public
+  };
+}
+
+export async function getModelById(id: string): Promise<Model | null> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("models")
+    .select("id, name, cover_url, cover_alt")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(`Nie udalo sie pobrac modelki: ${error.message}`);
+  if (!data) return null;
+  return { id: data.id, name: data.name, cover: data.cover_url, coverAlt: data.cover_alt };
+}
+
 export async function getModels(): Promise<Model[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase

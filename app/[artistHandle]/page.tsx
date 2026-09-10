@@ -1,10 +1,18 @@
 import Image from "next/image";
+import type { Metadata } from "next";
 import { Header } from "@/components/Header";
 import { ProjectCard } from "@/components/ProjectCard";
 import { artist } from "@/lib/data";
 import { getProjects } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: artist.displayName,
+  description: artist.bio,
+  openGraph: { title: artist.displayName, description: artist.bio, images: [{ url: artist.avatar }] },
+  twitter: { card: "summary_large_image", title: artist.displayName, description: artist.bio, images: [artist.avatar] }
+};
 
 export default async function ArtistProfile() {
   const projects = await getProjects();

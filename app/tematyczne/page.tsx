@@ -1,8 +1,14 @@
 import Image from "next/image";
+import type { Metadata } from "next";
 import { Header } from "@/components/Header";
 import { getProjects } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Makijaze tematyczne",
+  description: "Realizacje pogrupowane wedlug kategorii makijazu: editorial, wieczorowy, slubny, nude."
+};
 
 export default async function TematycznePage() {
   const projects = await getProjects();

@@ -30,6 +30,7 @@ export default async function StudioModelkiPage() {
                 </div>
                 <div className="p-3">
                   <h3 className="font-serif text-2xl font-semibold leading-none">{model.name}</h3>
+                  <Link href={`/studio/modelki/${model.id}/edytuj`} className="mt-2 inline-block text-sm text-accent hover:underline">Edytuj</Link>
                 </div>
               </article>
             ))}

@@ -1,6 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ArrowLeft, LockKeyhole } from "lucide-react";
 import { login } from "@/lib/auth-actions";
+
+export const metadata: Metadata = {
+  title: "Logowanie",
+  robots: { index: false, follow: false }
+};
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;

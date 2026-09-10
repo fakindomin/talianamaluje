@@ -1,8 +1,14 @@
 import Image from "next/image";
+import type { Metadata } from "next";
 import { Header } from "@/components/Header";
 import { getModels } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Modelki",
+  description: "Modelki wspolpracujace przy sesjach zdjeciowych z talianamaluje."
+};
 
 export default async function ModelkiPage() {
   const models = await getModels();
