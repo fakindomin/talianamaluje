@@ -19,6 +19,7 @@ button, input, textarea, select { font: inherit; }
   animation-delay: var(--tile-anim-delay);
   animation-iteration-count: infinite;
   animation-timing-function: linear;
+  animation-fill-mode: backwards;
 }
 
 .tile-kenburns {

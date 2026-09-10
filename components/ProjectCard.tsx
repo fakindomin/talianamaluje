@@ -6,13 +6,22 @@ import type { CSSProperties } from "react";
 const VISIBLE_SECONDS = 4;
 const FADE_SECONDS = 1;
 
+function hashOffsetSeconds(id: string, total: number) {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  }
+  return (hash % Math.round(total * 100)) / 100;
+}
+
 function buildCrossfadeCss(keyframeName: string, count: number) {
   if (count <= 1) return "";
   const slot = VISIBLE_SECONDS + FADE_SECONDS;
   const total = slot * count;
-  const holdPercent = (VISIBLE_SECONDS / total) * 100;
-  const fadeEndPercent = (slot / total) * 100;
-  return `@keyframes ${keyframeName} { 0% { opacity: 1; } ${holdPercent.toFixed(2)}% { opacity: 1; } ${fadeEndPercent.toFixed(2)}% { opacity: 0; } 100% { opacity: 0; } }`;
+  const fadeInEnd = (FADE_SECONDS / total) * 100;
+  const holdEnd = (slot / total) * 100;
+  const fadeOutEnd = ((slot + FADE_SECONDS) / total) * 100;
+  return `@keyframes ${keyframeName} { 0% { opacity: 0; } ${fadeInEnd.toFixed(2)}% { opacity: 1; } ${holdEnd.toFixed(2)}% { opacity: 1; } ${fadeOutEnd.toFixed(2)}% { opacity: 0; } 100% { opacity: 0; } }`;
 }
 
 export function ProjectCard({ project, priority = false }: { project: Project; priority?: boolean }) {
@@ -20,6 +29,7 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
   const keyframeName = `cf-${project.id.replace(/[^a-zA-Z0-9]/g, "")}`;
   const slot = VISIBLE_SECONDS + FADE_SECONDS;
   const total = slot * photos.length;
+  const projectOffset = photos.length > 1 ? hashOffsetSeconds(project.id, total) : 0;
 
   return (
     <Link href={`/work/${project.slug}`} className="group block">
@@ -31,8 +41,7 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
               ? ({
                   "--tile-anim-name": keyframeName,
                   "--tile-anim-duration": `${total}s`,
-                  "--tile-anim-delay": `${index * slot}s`,
-                  opacity: index === 0 ? 1 : 0
+                  "--tile-anim-delay": `${index * slot - projectOffset}s`
                 } as CSSProperties)
               : undefined;
           return (
