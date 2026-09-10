@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Header } from "@/components/Header";
 import { ProjectCard } from "@/components/ProjectCard";
 import { projects } from "@/lib/data";
@@ -7,11 +6,10 @@ export default function Home() {
   const publicProjects = projects.filter((project) => project.public);
   return (
     <main>
-      <Header />
+      <Header active="portfolio" />
       <section className="mx-auto max-w-7xl px-4 pb-8 pt-8 sm:px-6 lg:px-8">
         <div className="mb-8 grid gap-6 border-b border-ink/10 pb-8 md:grid-cols-[1.1fr_0.9fr] md:items-end">
           <div>
-            <Image src="/logo-full.webp" alt="talianamaluje — makeup artist" width={220} height={168} priority className="mb-6 h-auto w-48 sm:w-56" />
             <p className="mb-2 text-xs uppercase text-accent">Portfolio jednej artystki</p>
             <h1 className="max-w-3xl font-serif text-5xl font-semibold leading-[0.95] sm:text-7xl">Makijaz pokazany jak editorial, zarzadzany jak studio pracy.</h1>
           </div>
