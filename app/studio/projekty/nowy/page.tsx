@@ -49,6 +49,10 @@ export default async function NowyProjektPage() {
             <input name="newModelName" className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. Klaudia" />
           </label>
           <PhotoUploadField name="photoUrls" folder="projects" multiple label="Zdjecia* (mozna wybrac kilka naraz — pierwsze bedzie miniatura)" />
+          <label className="block text-sm">
+            Kolor tekstu na kafelku (dobierz pod jasnosc zdjecia)
+            <input type="color" name="textColor" defaultValue="#F7EFEA" className="mt-2 h-11 w-full border border-ink/15 bg-canvas px-2" />
+          </label>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="isPublic" defaultChecked className="h-4 w-4" />
             Widoczny publicznie (Portfolio, Makijaze tematyczne)

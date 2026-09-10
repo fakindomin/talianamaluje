@@ -46,6 +46,7 @@ export async function addProject(formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const productsRaw = String(formData.get("products") || "").trim();
   const isPublic = formData.get("isPublic") === "on";
+  const textColor = String(formData.get("textColor") || "#F7EFEA").trim();
   const photoUrls = getPhotoUrls(formData, "photoUrls");
 
   if (!title || photoUrls.length === 0) {
@@ -68,7 +69,8 @@ export async function addProject(formData: FormData) {
     photo_urls: photoUrls,
     products,
     is_public: isPublic,
-    model_id: modelId
+    model_id: modelId,
+    text_color: textColor
   });
   if (error) throw new Error(`Nie udalo sie zapisac projektu: ${error.message}`);
 
@@ -109,6 +111,7 @@ export async function updateProject(id: string, formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const productsRaw = String(formData.get("products") || "").trim();
   const isPublic = formData.get("isPublic") === "on";
+  const textColor = String(formData.get("textColor") || "#F7EFEA").trim();
   const newPhotoUrls = getPhotoUrls(formData, "photoUrls");
 
   if (!title) throw new Error("Tytul jest wymagany.");
@@ -120,7 +123,8 @@ export async function updateProject(id: string, formData: FormData) {
     date_label: dateLabel,
     description,
     products,
-    is_public: isPublic
+    is_public: isPublic,
+    text_color: textColor
   };
 
   const supabase = getSupabase();

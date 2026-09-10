@@ -12,3 +12,36 @@ button, input, textarea, select { font: inherit; }
 ::selection { background: #e8d7d9; }
 .masonry { column-gap: 16px; }
 .masonry > * { break-inside: avoid; margin-bottom: 16px; }
+
+.tile-crossfade {
+  animation-name: var(--tile-anim-name);
+  animation-duration: var(--tile-anim-duration);
+  animation-delay: var(--tile-anim-delay);
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+.tile-kenburns {
+  animation: tile-kenburns 20s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+.tile-text-drift {
+  animation: tile-text-drift 14s ease-in-out infinite alternate;
+}
+
+@keyframes tile-kenburns {
+  0% { transform: scale(1.08) translate(0, 0); }
+  100% { transform: scale(1.16) translate(-2.5%, -2%); }
+}
+
+@keyframes tile-text-drift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-1.5%, 1.5%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile-crossfade, .tile-kenburns, .tile-text-drift {
+    animation: none !important;
+  }
+}

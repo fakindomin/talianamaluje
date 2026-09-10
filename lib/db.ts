@@ -24,6 +24,7 @@ export type Project = {
   public: boolean;
   modelId: string | null;
   modelName: string | null;
+  textColor: string;
 };
 
 export type Model = {
@@ -33,7 +34,7 @@ export type Model = {
   coverAlt: string;
 };
 
-const PROJECT_SELECT = "id, slug, title, style, date_label, description, cover_url, cover_alt, photo_urls, products, is_public, model_id, models(name)";
+const PROJECT_SELECT = "id, slug, title, style, date_label, description, cover_url, cover_alt, photo_urls, products, is_public, model_id, text_color, models(name)";
 
 type ProjectRow = {
   id: string;
@@ -48,6 +49,7 @@ type ProjectRow = {
   products: string[] | null;
   is_public: boolean;
   model_id: string | null;
+  text_color: string | null;
   models: { name: string } | { name: string }[] | null;
 };
 
@@ -67,7 +69,8 @@ function mapProject(row: ProjectRow): Project {
     products: row.products ?? [],
     public: row.is_public,
     modelId: row.model_id,
-    modelName
+    modelName,
+    textColor: row.text_color || "#F7EFEA"
   };
 }
 
