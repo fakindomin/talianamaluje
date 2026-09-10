@@ -36,11 +36,15 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
       <div className="relative">
         {photos.length > 1 && (
           <>
-            <div aria-hidden className="absolute inset-0 translate-x-3 translate-y-3 -rotate-2 bg-soft-accent shadow-line" />
-            <div aria-hidden className="absolute inset-0 translate-x-1.5 translate-y-1.5 rotate-1 bg-[#F7EFEA] shadow-line" />
+            <div aria-hidden className="absolute inset-0 translate-x-3 translate-y-3 -rotate-2 overflow-hidden rounded-md bg-soft-accent shadow-line">
+              <Image src={photos[2 % photos.length]} alt="" fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover" />
+            </div>
+            <div aria-hidden className="absolute inset-0 translate-x-1.5 translate-y-1.5 rotate-1 overflow-hidden rounded-md bg-[#F7EFEA] shadow-line">
+              <Image src={photos[1 % photos.length]} alt="" fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover" />
+            </div>
           </>
         )}
-        <article className="relative aspect-[4/5] overflow-hidden bg-soft-accent shadow-line">
+        <article className="relative aspect-[4/5] overflow-hidden rounded-md bg-soft-accent shadow-line">
           {photos.length > 1 && <style>{buildCrossfadeCss(keyframeName, photos.length)}</style>}
         {photos.map((photo, index) => {
           const layerStyle: CSSProperties | undefined =
