@@ -1,9 +1,11 @@
 import Image from "next/image";
 import { Header } from "@/components/Header";
 import { ProjectCard } from "@/components/ProjectCard";
-import { artist, projects } from "@/lib/data";
+import { artist } from "@/lib/data";
+import { getProjects } from "@/lib/db";
 
-export default function ArtistProfile() {
+export default async function ArtistProfile() {
+  const projects = await getProjects();
   return (
     <main>
       <Header />

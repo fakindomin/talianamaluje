@@ -1,8 +1,9 @@
 import { Header } from "@/components/Header";
 import { ProjectCard } from "@/components/ProjectCard";
-import { projects } from "@/lib/data";
+import { getProjects } from "@/lib/db";
 
-export default function Home() {
+export default async function Home() {
+  const projects = await getProjects();
   const publicProjects = projects.filter((project) => project.public);
   return (
     <main>

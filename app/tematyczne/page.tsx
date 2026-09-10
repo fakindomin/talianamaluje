@@ -1,8 +1,9 @@
 import Image from "next/image";
 import { Header } from "@/components/Header";
-import { projects } from "@/lib/data";
+import { getProjects } from "@/lib/db";
 
-export default function TematycznePage() {
+export default async function TematycznePage() {
+  const projects = await getProjects();
   const publicProjects = projects.filter((project) => project.public);
 
   return (

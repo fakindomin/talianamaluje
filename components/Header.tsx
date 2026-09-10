@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { LockKeyhole, UserRound } from "lucide-react";
+import { LockKeyhole } from "lucide-react";
 
 type CategoryTab = "portfolio" | "modelki" | "tematyczne";
 
@@ -21,7 +21,6 @@ export function Header({ active }: { active?: CategoryTab } = {}) {
         <nav className="flex items-center gap-2 text-sm text-muted">
           <Link className="px-3 py-2 hover:text-ink" href="/@nina-kaminska">Profil</Link>
           <Link className="inline-flex items-center gap-2 rounded border border-ink/15 px-3 py-2 text-ink hover:bg-soft-accent" href="/login"><LockKeyhole aria-hidden size={16} />Studio</Link>
-          <Link className="hidden items-center gap-2 px-3 py-2 hover:text-ink sm:inline-flex" href="/studio"><UserRound aria-hidden size={16} />Demo</Link>
         </nav>
       </div>
       <nav className="mx-auto flex max-w-7xl gap-1 px-4 pb-3 sm:px-6 lg:px-8">
