@@ -103,7 +103,7 @@ export function PhotoUploadField({
       {photos.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-3">
           {photos.map((photo, index) => (
-            <div key={index} className="relative h-20 w-16 overflow-hidden rounded border border-ink/10 bg-soft-accent">
+            <div key={index} className="relative h-20 w-16 overflow-hidden rounded-md bg-soft-accent shadow-line">
               {photo.uploading ? (
                 <div className="flex h-full w-full items-center justify-center">
                   <Loader2 aria-hidden size={16} className="animate-spin text-muted" />

@@ -23,7 +23,7 @@ export default async function EdytujModelkePage({ params }: { params: Promise<{ 
         <Link href="/studio/modelki" className="inline-flex items-center gap-2 text-sm text-muted hover:text-ink"><ArrowLeft aria-hidden size={16} />Wroc do Modelek</Link>
         <h1 className="mt-4 font-serif text-5xl font-semibold leading-none">Edytuj modelke</h1>
         <div className="mt-6 max-w-xl">
-          <div className="relative aspect-[4/5] w-48 overflow-hidden rounded border border-ink/10 bg-soft-accent">
+          <div className="relative aspect-[4/5] w-48 overflow-hidden rounded-md bg-soft-accent shadow-line">
             <Image src={model.cover} alt={model.coverAlt} fill sizes="192px" className="object-cover" />
           </div>
         </div>

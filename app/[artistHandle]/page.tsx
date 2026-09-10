@@ -21,7 +21,7 @@ export default async function ArtistProfile() {
       <Header />
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid gap-8 border-b border-ink/10 pb-8 md:grid-cols-[320px_1fr]">
-          <div className="relative aspect-[4/5] overflow-hidden rounded border border-ink/10 bg-soft-accent">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-soft-accent shadow-line">
             <Image src={artist.avatar} alt={artist.avatarAlt} fill priority sizes="320px" className="object-cover" />
           </div>
           <div className="self-end">

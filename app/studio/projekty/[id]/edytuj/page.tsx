@@ -24,7 +24,7 @@ export default async function EdytujProjektPage({ params }: { params: Promise<{ 
         <h1 className="mt-4 font-serif text-5xl font-semibold leading-none">Edytuj projekt</h1>
         <div className="mt-6 flex max-w-xl flex-wrap gap-3">
           {project.photos.map((photo) => (
-            <div key={photo} className="relative aspect-[4/5] w-28 overflow-hidden rounded border border-ink/10 bg-soft-accent">
+            <div key={photo} className="relative aspect-[4/5] w-28 overflow-hidden rounded-md bg-soft-accent shadow-line">
               <Image src={photo} alt={project.coverAlt} fill sizes="112px" className="object-cover" />
             </div>
           ))}

@@ -22,7 +22,7 @@ export default async function UsunProjektPage({ params }: { params: Promise<{ id
         <Link href={`/studio/projekty/${id}/edytuj`} className="inline-flex items-center gap-2 text-sm text-muted hover:text-ink"><ArrowLeft aria-hidden size={16} />Wroc do edycji</Link>
         <h1 className="mt-4 font-serif text-5xl font-semibold leading-none">Usunac ten projekt?</h1>
         <div className="mt-6 flex max-w-xl items-center gap-4 border border-ink/10 bg-white/35 p-4">
-          <div className="relative aspect-[4/5] w-24 shrink-0 overflow-hidden rounded bg-soft-accent">
+          <div className="relative aspect-[4/5] w-24 shrink-0 overflow-hidden rounded-md bg-soft-accent shadow-line">
             <Image src={project.cover} alt={project.coverAlt} fill sizes="96px" className="object-cover" />
           </div>
           <div>

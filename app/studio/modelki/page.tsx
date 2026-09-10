@@ -24,7 +24,7 @@ export default async function StudioModelkiPage() {
         ) : (
           <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {models.map((model) => (
-              <article key={model.id} className="overflow-hidden border border-ink/10 bg-white/35">
+              <article key={model.id} className="overflow-hidden rounded-md border border-ink/10 bg-white/35">
                 <div className="relative aspect-[4/5] bg-soft-accent">
                   <Image src={model.cover} alt={model.coverAlt} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover" />
                 </div>

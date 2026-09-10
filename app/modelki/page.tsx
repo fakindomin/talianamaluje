@@ -21,7 +21,7 @@ export default async function ModelkiPage() {
         {models.length === 0 && <p className="text-sm text-muted">Wkrotce pojawia sie tu modelki wspolpracujace przy sesjach.</p>}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {models.map((model, index) => (
-            <article key={model.id} className="overflow-hidden rounded border border-ink/10 bg-white/35">
+            <article key={model.id} className="overflow-hidden rounded-md bg-white/35 shadow-line">
               <div className="relative aspect-[4/5] bg-soft-accent">
                 <Image
                   src={model.cover}
