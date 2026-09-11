@@ -10,7 +10,16 @@ export function PhotoCarousel({ photos, alt }: { photos: string[]; alt: string }
   const scrollByPage = (direction: 1 | -1) => {
     const el = trackRef.current;
     if (!el) return;
-    el.scrollBy({ left: direction * el.clientWidth, behavior: "smooth" });
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    const atEnd = el.scrollLeft >= maxScroll - 4;
+    const atStart = el.scrollLeft <= 4;
+    if (direction === 1 && atEnd) {
+      el.scrollTo({ left: 0, behavior: "smooth" });
+    } else if (direction === -1 && atStart) {
+      el.scrollTo({ left: maxScroll, behavior: "smooth" });
+    } else {
+      el.scrollBy({ left: direction * el.clientWidth, behavior: "smooth" });
+    }
   };
 
   if (photos.length <= 1) {
