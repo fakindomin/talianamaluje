@@ -151,6 +151,24 @@ export async function updateProject(id: string, formData: FormData) {
   redirect("/studio");
 }
 
+export async function removeProjectPhoto(id: string, photoUrl: string) {
+  const supabase = getSupabase();
+  const { data: existing, error: fetchError } = await supabase.from("projects").select("photo_urls").eq("id", id).maybeSingle();
+  if (fetchError) throw new Error(`Nie udalo sie pobrac projektu: ${fetchError.message}`);
+
+  const remaining = (existing?.photo_urls ?? []).filter((url: string) => url !== photoUrl);
+  if (remaining.length === 0) throw new Error("Projekt musi miec przynajmniej jedno zdjecie.");
+
+  const { error } = await supabase.from("projects").update({ photo_urls: remaining, cover_url: remaining[0] }).eq("id", id);
+  if (error) throw new Error(`Nie udalo sie usunac zdjecia: ${error.message}`);
+
+  revalidatePath("/");
+  revalidatePath("/tematyczne");
+  revalidatePath("/modelki");
+  revalidatePath("/studio");
+  revalidatePath(`/studio/projekty/${id}/edytuj`);
+}
+
 export async function deleteProject(id: string) {
   const supabase = getSupabase();
   const { error } = await supabase.from("projects").delete().eq("id", id);

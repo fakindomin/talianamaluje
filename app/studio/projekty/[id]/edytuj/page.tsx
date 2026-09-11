@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import { PhotoUploadField } from "@/components/PhotoUploadField";
 import { StudioSidebar } from "@/components/StudioSidebar";
-import { updateProject } from "@/lib/actions";
+import { removeProjectPhoto, updateProject } from "@/lib/actions";
 import { getModels, getProjectById } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +15,7 @@ export default async function EdytujProjektPage({ params }: { params: Promise<{ 
   if (!project) notFound();
 
   const updateWithId = updateProject.bind(null, id);
+  const canRemovePhotos = project.photos.length > 1;
 
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
@@ -26,6 +27,17 @@ export default async function EdytujProjektPage({ params }: { params: Promise<{ 
           {project.photos.map((photo) => (
             <div key={photo} className="relative aspect-[4/5] w-28 overflow-hidden rounded-md bg-soft-accent shadow-line">
               <Image src={photo} alt={project.coverAlt} fill sizes="112px" className="object-cover" />
+              {canRemovePhotos && (
+                <form action={removeProjectPhoto.bind(null, project.id, photo)} className="absolute right-1 top-1">
+                  <button
+                    type="submit"
+                    aria-label="Usun zdjecie"
+                    className="rounded-full bg-ink/70 p-1 text-white hover:bg-ink"
+                  >
+                    <X aria-hidden size={12} />
+                  </button>
+                </form>
+              )}
             </div>
           ))}
         </div>
