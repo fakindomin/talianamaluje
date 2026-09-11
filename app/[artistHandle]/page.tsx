@@ -2,34 +2,36 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { Header } from "@/components/Header";
 import { ProjectCard } from "@/components/ProjectCard";
-import { artist } from "@/lib/data";
-import { getProjects } from "@/lib/db";
+import { getProfile, getProjects } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: artist.displayName,
-  description: artist.bio,
-  openGraph: { title: artist.displayName, description: artist.bio, images: [{ url: artist.avatar }] },
-  twitter: { card: "summary_large_image", title: artist.displayName, description: artist.bio, images: [artist.avatar] }
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const profile = await getProfile();
+  return {
+    title: profile.displayName,
+    description: profile.bio,
+    openGraph: { title: profile.displayName, description: profile.bio, images: [{ url: profile.avatar }] },
+    twitter: { card: "summary_large_image", title: profile.displayName, description: profile.bio, images: [profile.avatar] }
+  };
+}
 
 export default async function ArtistProfile() {
-  const projects = await getProjects();
+  const [profile, projects] = await Promise.all([getProfile(), getProjects()]);
   return (
     <main>
       <Header />
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid gap-8 border-b border-ink/10 pb-8 md:grid-cols-[320px_1fr]">
           <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-soft-accent shadow-line">
-            <Image src={artist.avatar} alt={artist.avatarAlt} fill priority sizes="320px" className="object-cover" />
+            <Image src={profile.avatar} alt={profile.avatarAlt} fill priority sizes="320px" className="object-cover" />
           </div>
           <div className="self-end">
-            <p className="text-xs uppercase text-accent">{artist.brandName}</p>
-            <h1 className="mt-2 font-serif text-6xl font-semibold leading-none">{artist.displayName}</h1>
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">{artist.bio}</p>
+            <p className="text-xs uppercase text-accent">{profile.brandName}</p>
+            <h1 className="mt-2 font-serif text-6xl font-semibold leading-none">{profile.displayName}</h1>
+            <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">{profile.bio}</p>
             <div className="mt-6 flex flex-wrap gap-2">
-              {[artist.city, artist.serviceArea, ...artist.specialties].map((item) => <span key={item} className="rounded border border-ink/10 px-3 py-1 text-sm text-muted">{item}</span>)}
+              {[profile.city, profile.serviceArea, ...profile.specialties].map((item) => <span key={item} className="rounded border border-ink/10 px-3 py-1 text-sm text-muted">{item}</span>)}
             </div>
           </div>
         </div>

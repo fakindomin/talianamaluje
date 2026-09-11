@@ -5,10 +5,22 @@ import { useRef, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 
-type UploadedPhoto = { url: string; uploading: boolean };
+type UploadedPhoto = { url: string; uploading: boolean; error?: string };
 
-async function compressImage(file: File, maxDim = 1920, quality = 0.82): Promise<Blob> {
-  const bitmap = await createImageBitmap(file);
+function isHeic(file: File): boolean {
+  const type = file.type.toLowerCase();
+  return type === "image/heic" || type === "image/heif" || /\.hei[cf]$/i.test(file.name);
+}
+
+async function toDisplayableBlob(file: File): Promise<Blob> {
+  if (!isHeic(file)) return file;
+  const heic2any = (await import("heic2any")).default;
+  const converted = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+  return Array.isArray(converted) ? converted[0] : converted;
+}
+
+async function compressImage(source: Blob, maxDim = 1920, quality = 0.82): Promise<Blob> {
+  const bitmap = await createImageBitmap(source);
   let { width, height } = bitmap;
   if (width > maxDim || height > maxDim) {
     const scale = maxDim / Math.max(width, height);
@@ -19,10 +31,10 @@ async function compressImage(file: File, maxDim = 1920, quality = 0.82): Promise
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
-  if (!ctx) return file;
+  if (!ctx) return source;
   ctx.drawImage(bitmap, 0, 0, width, height);
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
-  return blob ?? file;
+  return blob ?? source;
 }
 
 export function PhotoUploadField({
@@ -32,7 +44,7 @@ export function PhotoUploadField({
   label
 }: {
   name: string;
-  folder: "projects" | "models";
+  folder: "projects" | "models" | "profile";
   multiple?: boolean;
   label: string;
 }) {
@@ -57,7 +69,8 @@ export function PhotoUploadField({
 
     for (let i = 0; i < list.length; i++) {
       try {
-        const compressed = await compressImage(list[i]);
+        const displayable = await toDisplayableBlob(list[i]);
+        const compressed = await compressImage(displayable);
         const path = `${folder}/${crypto.randomUUID()}.jpg`;
         const { error } = await supabase.storage.from("media").upload(path, compressed, {
           contentType: "image/jpeg",
@@ -71,7 +84,11 @@ export function PhotoUploadField({
           return next;
         });
       } catch {
-        setPhotos((prev) => prev.filter((_, idx) => idx !== startIndex + i));
+        setPhotos((prev) => {
+          const next = multiple ? [...prev] : [{ url: "", uploading: true }];
+          next[startIndex + i] = { url: "", uploading: false, error: `Nie udalo sie przetworzyc zdjecia "${list[i].name}".` };
+          return next;
+        });
       }
     }
     setFormBusy(false);
@@ -89,7 +106,7 @@ export function PhotoUploadField({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,.heic,.heif"
         multiple={multiple}
         onChange={(e) => handleFiles(e.target.files)}
         className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3"
@@ -108,6 +125,16 @@ export function PhotoUploadField({
                 <div className="flex h-full w-full items-center justify-center">
                   <Loader2 aria-hidden size={16} className="animate-spin text-muted" />
                 </div>
+              ) : photo.error ? (
+                <button
+                  type="button"
+                  onClick={() => removePhoto(index)}
+                  aria-label={photo.error}
+                  title={photo.error}
+                  className="flex h-full w-full items-center justify-center bg-accent/10 text-accent"
+                >
+                  <X aria-hidden size={16} />
+                </button>
               ) : (
                 <>
                   <Image src={photo.url} alt="" fill sizes="64px" className="object-cover" />
@@ -125,6 +152,11 @@ export function PhotoUploadField({
             </div>
           ))}
         </div>
+      )}
+      {photos.some((p) => p.error) && (
+        <p className="mt-2 text-xs text-accent">
+          {photos.find((p) => p.error)?.error} Sprobuj ponownie lub zapisz zdjecie w innym formacie (np. JPG).
+        </p>
       )}
     </div>
   );

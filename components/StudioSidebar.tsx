@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CalendarDays, CheckSquare, FlaskConical, Images, LogOut, Settings, UserRound, UsersRound } from "lucide-react";
 import { logout } from "@/lib/auth-actions";
 
-type StudioTab = "portfolio" | "modelki";
+type StudioTab = "portfolio" | "modelki" | "profil";
 
 const nav: { label: string; icon: typeof Images; href: string; key?: StudioTab }[] = [
   { label: "Portfolio", icon: Images, href: "/studio", key: "portfolio" },
@@ -11,7 +11,7 @@ const nav: { label: string; icon: typeof Images; href: string; key?: StudioTab }
   { label: "Modelki", icon: UsersRound, href: "/studio/modelki", key: "modelki" },
   { label: "Kalendarz", icon: CalendarDays, href: "#" },
   { label: "Na wyjazd", icon: CheckSquare, href: "#" },
-  { label: "Profil", icon: UserRound, href: "#" },
+  { label: "Profil", icon: UserRound, href: "/studio/profil", key: "profil" },
   { label: "Ustawienia", icon: Settings, href: "#" }
 ];
 

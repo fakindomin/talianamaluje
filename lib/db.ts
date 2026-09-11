@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { artist } from "@/lib/data";
 
 export function getSupabase() {
   const url = process.env.SUPABASE_URL?.trim();
@@ -106,6 +107,40 @@ export async function getModelById(id: string): Promise<Model | null> {
   if (error) throw new Error(`Nie udalo sie pobrac modelki: ${error.message}`);
   if (!data) return null;
   return { id: data.id, name: data.name, cover: data.cover_url, coverAlt: data.cover_alt };
+}
+
+export type Profile = {
+  displayName: string;
+  brandName: string;
+  slug: string;
+  city: string;
+  serviceArea: string;
+  bio: string;
+  avatar: string;
+  avatarAlt: string;
+  specialties: string[];
+};
+
+export async function getProfile(): Promise<Profile> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("profile")
+    .select("display_name, brand_name, slug, city, service_area, bio, avatar_url, avatar_alt, specialties")
+    .eq("id", "default")
+    .maybeSingle();
+  if (error) throw new Error(`Nie udalo sie pobrac profilu: ${error.message}`);
+  if (!data) return artist;
+  return {
+    displayName: data.display_name,
+    brandName: data.brand_name,
+    slug: data.slug,
+    city: data.city,
+    serviceArea: data.service_area,
+    bio: data.bio,
+    avatar: data.avatar_url,
+    avatarAlt: data.avatar_alt,
+    specialties: data.specialties ?? []
+  };
 }
 
 export async function getModels(): Promise<Model[]> {

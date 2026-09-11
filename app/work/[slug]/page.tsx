@@ -3,18 +3,17 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
-import { artist } from "@/lib/data";
-import { getProjects } from "@/lib/db";
+import { getProfile, getProjects } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const projects = await getProjects();
+  const [profile, projects] = await Promise.all([getProfile(), getProjects()]);
   const project = projects.find((item) => item.slug === slug && item.public);
   if (!project) return {};
   const title = project.title;
-  const description = project.description || `${project.style} — realizacja ${artist.displayName}.`;
+  const description = project.description || `${project.style} — realizacja ${profile.displayName}.`;
   return {
     title,
     description,
@@ -25,13 +24,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function WorkPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const projects = await getProjects();
+  const [profile, projects] = await Promise.all([getProfile(), getProjects()]);
   const project = projects.find((item) => item.slug === slug && item.public);
   if (!project) notFound();
   return (
     <main className="min-h-screen">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <Link href={`/@${artist.slug}`} className="inline-flex items-center gap-2 text-sm text-muted hover:text-ink"><ArrowLeft aria-hidden size={16} />Wroc do profilu</Link>
+        <Link href={`/@${profile.slug}`} className="inline-flex items-center gap-2 text-sm text-muted hover:text-ink"><ArrowLeft aria-hidden size={16} />Wroc do profilu</Link>
         <section className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
           <PhotoCarousel photos={project.photos} alt={project.coverAlt || project.title} />
           <aside className="self-end border-t border-ink/10 pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">

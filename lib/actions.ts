@@ -181,6 +181,46 @@ export async function updateModel(id: string, formData: FormData) {
   redirect("/studio/modelki");
 }
 
+export async function updateProfile(formData: FormData) {
+  const displayName = String(formData.get("displayName") || "").trim();
+  const brandName = String(formData.get("brandName") || "").trim();
+  const slug = String(formData.get("slug") || "").trim();
+  const city = String(formData.get("city") || "").trim();
+  const serviceArea = String(formData.get("serviceArea") || "").trim();
+  const bio = String(formData.get("bio") || "").trim();
+  const avatarUrl = String(formData.get("avatarUrl") || "").trim();
+  const specialtiesRaw = String(formData.get("specialties") || "").trim();
+
+  if (!displayName || !slug) throw new Error("Imie i nazwisko oraz nick sa wymagane.");
+
+  const specialties = specialtiesRaw ? specialtiesRaw.split(",").map((s) => s.trim()).filter(Boolean) : [];
+
+  const update: Record<string, unknown> = {
+    display_name: displayName,
+    brand_name: brandName,
+    slug,
+    city,
+    service_area: serviceArea,
+    bio,
+    specialties
+  };
+  if (avatarUrl) {
+    update.avatar_url = avatarUrl;
+    update.avatar_alt = `Portret ${displayName}`;
+  }
+
+  const supabase = getSupabase();
+  const { error } = await supabase.from("profile").update(update).eq("id", "default");
+  if (error) throw new Error(`Nie udalo sie zapisac profilu: ${error.message}`);
+
+  revalidatePath("/");
+  revalidatePath("/tematyczne");
+  revalidatePath("/modelki");
+  revalidatePath("/studio");
+  revalidatePath("/studio/profil");
+  redirect("/studio/profil");
+}
+
 export async function deleteModel(id: string) {
   const supabase = getSupabase();
   const { error } = await supabase.from("models").delete().eq("id", id);

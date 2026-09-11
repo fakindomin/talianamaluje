@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LockKeyhole } from "lucide-react";
-import { artist } from "@/lib/data";
+import { getProfile } from "@/lib/db";
 
 type CategoryTab = "portfolio" | "modelki" | "tematyczne";
 
@@ -11,7 +11,8 @@ const categoryTabs: { key: CategoryTab; label: string; href: string }[] = [
   { key: "tematyczne", label: "Makijaze tematyczne", href: "/tematyczne" }
 ];
 
-export function Header({ active }: { active?: CategoryTab } = {}) {
+export async function Header({ active }: { active?: CategoryTab } = {}) {
+  const profile = await getProfile();
   return (
     <header className="sticky top-0 z-20 border-b border-ink/10 bg-canvas/90 backdrop-blur">
       <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -20,7 +21,7 @@ export function Header({ active }: { active?: CategoryTab } = {}) {
           talianamaluje
         </Link>
         <nav className="flex items-center gap-2 text-sm text-muted">
-          <Link className="px-3 py-2 hover:text-ink" href={`/@${artist.slug}`}>Profil</Link>
+          <Link className="px-3 py-2 hover:text-ink" href={`/@${profile.slug}`}>Profil</Link>
           <Link className="inline-flex items-center gap-2 rounded border border-ink/15 px-3 py-2 text-ink hover:bg-soft-accent" href="/login"><LockKeyhole aria-hidden size={16} />Studio</Link>
         </nav>
       </div>
