@@ -34,6 +34,7 @@ export type Model = {
   name: string;
   cover: string;
   coverAlt: string;
+  photos: string[];
 };
 
 const PROJECT_SELECT = "id, slug, title, style, date_label, description, cover_url, cover_alt, photo_urls, before_photo_urls, products, is_public, model_id, text_color, models(name)";
@@ -104,12 +105,13 @@ export async function getModelById(id: string): Promise<Model | null> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("models")
-    .select("id, name, cover_url, cover_alt")
+    .select("id, name, cover_url, cover_alt, photo_urls")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`Nie udalo sie pobrac modelki: ${error.message}`);
   if (!data) return null;
-  return { id: data.id, name: data.name, cover: data.cover_url, coverAlt: data.cover_alt };
+  const photos = data.photo_urls && data.photo_urls.length > 0 ? data.photo_urls : [data.cover_url];
+  return { id: data.id, name: data.name, cover: data.cover_url, coverAlt: data.cover_alt, photos };
 }
 
 export type Profile = {
@@ -150,13 +152,14 @@ export async function getModels(): Promise<Model[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("models")
-    .select("id, name, cover_url, cover_alt")
+    .select("id, name, cover_url, cover_alt, photo_urls")
     .order("created_at", { ascending: false });
   if (error) throw new Error(`Nie udalo sie pobrac modelek: ${error.message}`);
   return (data ?? []).map((row) => ({
     id: row.id,
     name: row.name,
     cover: row.cover_url,
-    coverAlt: row.cover_alt
+    coverAlt: row.cover_alt,
+    photos: row.photo_urls && row.photo_urls.length > 0 ? row.photo_urls : [row.cover_url]
   }));
 }

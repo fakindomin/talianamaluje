@@ -16,7 +16,7 @@ export default function NowaModelkaPage() {
             Imie*
             <input name="name" required className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. Klaudia" />
           </label>
-          <PhotoUploadField name="coverUrl" folder="models" label="Zdjecie*" />
+          <PhotoUploadField name="photoUrls" folder="models" multiple label="Zdjecia* (pierwsze bedzie glownym)" />
           <button type="submit" className="w-full bg-accent px-4 py-3 text-sm font-medium text-white sm:w-auto">Zapisz modelke</button>
         </form>
       </section>

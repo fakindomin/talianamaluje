@@ -87,17 +87,18 @@ export async function addProject(formData: FormData) {
 
 export async function addModel(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
-  const coverUrl = String(formData.get("coverUrl") || "").trim();
+  const photoUrls = getPhotoUrls(formData, "photoUrls");
 
-  if (!name || !coverUrl) {
-    throw new Error("Imie i zdjecie sa wymagane.");
+  if (!name || photoUrls.length === 0) {
+    throw new Error("Imie i przynajmniej jedno zdjecie sa wymagane.");
   }
 
   const supabase = getSupabase();
   const { error } = await supabase.from("models").insert({
     name,
-    cover_url: coverUrl,
-    cover_alt: `Portret modelki ${name}`
+    cover_url: photoUrls[0],
+    cover_alt: `Portret modelki ${name}`,
+    photo_urls: photoUrls
   });
   if (error) throw new Error(`Nie udalo sie zapisac modelki: ${error.message}`);
 
@@ -206,20 +207,65 @@ export async function deleteProject(id: string) {
 
 export async function updateModel(id: string, formData: FormData) {
   const name = String(formData.get("name") || "").trim();
-  const coverUrl = String(formData.get("coverUrl") || "").trim();
+  const newPhotoUrls = getPhotoUrls(formData, "photoUrls");
 
   if (!name) throw new Error("Imie jest wymagane.");
 
   const update: Record<string, unknown> = { name, cover_alt: `Portret modelki ${name}` };
-  if (coverUrl) update.cover_url = coverUrl;
 
   const supabase = getSupabase();
+
+  if (newPhotoUrls.length > 0) {
+    const { data: existing } = await supabase.from("models").select("photo_urls, cover_url").eq("id", id).maybeSingle();
+    const combined = [...(existing?.photo_urls ?? []), ...newPhotoUrls];
+    update.photo_urls = combined;
+    if (!existing?.cover_url) update.cover_url = combined[0];
+  }
+
   const { error } = await supabase.from("models").update(update).eq("id", id);
   if (error) throw new Error(`Nie udalo sie zaktualizowac modelki: ${error.message}`);
 
   revalidatePath("/modelki");
+  revalidatePath(`/modelki/${id}`);
   revalidatePath("/studio/modelki");
   redirect("/studio/modelki");
+}
+
+export async function setModelCover(id: string, photoUrl: string) {
+  const supabase = getSupabase();
+  const { data: existing, error: fetchError } = await supabase.from("models").select("name").eq("id", id).maybeSingle();
+  if (fetchError) throw new Error(`Nie udalo sie pobrac modelki: ${fetchError.message}`);
+
+  const { error } = await supabase
+    .from("models")
+    .update({ cover_url: photoUrl, cover_alt: `Portret modelki ${existing?.name ?? ""}` })
+    .eq("id", id);
+  if (error) throw new Error(`Nie udalo sie ustawic zdjecia glownego: ${error.message}`);
+
+  revalidatePath("/modelki");
+  revalidatePath(`/modelki/${id}`);
+  revalidatePath("/studio/modelki");
+  revalidatePath(`/studio/modelki/${id}/edytuj`);
+}
+
+export async function removeModelPhoto(id: string, photoUrl: string) {
+  const supabase = getSupabase();
+  const { data: existing, error: fetchError } = await supabase.from("models").select("photo_urls, cover_url").eq("id", id).maybeSingle();
+  if (fetchError) throw new Error(`Nie udalo sie pobrac modelki: ${fetchError.message}`);
+
+  const remaining = (existing?.photo_urls ?? []).filter((url: string) => url !== photoUrl);
+  if (remaining.length === 0) throw new Error("Modelka musi miec przynajmniej jedno zdjecie.");
+
+  const update: Record<string, unknown> = { photo_urls: remaining };
+  if (existing?.cover_url === photoUrl) update.cover_url = remaining[0];
+
+  const { error } = await supabase.from("models").update(update).eq("id", id);
+  if (error) throw new Error(`Nie udalo sie usunac zdjecia: ${error.message}`);
+
+  revalidatePath("/modelki");
+  revalidatePath(`/modelki/${id}`);
+  revalidatePath("/studio/modelki");
+  revalidatePath(`/studio/modelki/${id}/edytuj`);
 }
 
 export async function updateProfile(formData: FormData) {
