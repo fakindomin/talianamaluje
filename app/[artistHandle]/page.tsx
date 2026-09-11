@@ -36,7 +36,7 @@ export default async function ArtistProfile() {
           </div>
         </div>
         <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-          {projects.filter((project) => project.public).map((project) => <ProjectCard key={project.id} project={project} />)}
+          {projects.filter((project) => project.public).map((project) => <ProjectCard key={project.id} project={project} from={`/@${profile.slug}`} />)}
         </div>
       </section>
     </main>

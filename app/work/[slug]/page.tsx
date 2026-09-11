@@ -8,6 +8,17 @@ import { getProfile, getProjects } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
+function resolveBackTarget(back: string | undefined, profileSlug: string): { href: string; label: string } {
+  const isSafe = !!back && back.startsWith("/") && !back.startsWith("//") && !back.includes("://");
+  const path = isSafe ? back! : `/@${profileSlug}`;
+
+  if (path === "/") return { href: path, label: "Wroc do Portfolio" };
+  if (path === "/tematyczne") return { href: path, label: "Wroc do makijazy tematycznych" };
+  if (path.startsWith("/modelki/")) return { href: path, label: "Wroc do modelki" };
+  if (path.startsWith("/@")) return { href: path, label: "Wroc do profilu" };
+  return { href: `/@${profileSlug}`, label: "Wroc do profilu" };
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const [profile, projects] = await Promise.all([getProfile(), getProjects()]);
@@ -23,15 +34,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export default async function WorkPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function WorkPage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ back?: string }>;
+}) {
   const { slug } = await params;
+  const { back } = await searchParams;
   const [profile, projects] = await Promise.all([getProfile(), getProjects()]);
   const project = projects.find((item) => item.slug === slug && item.public);
   if (!project) notFound();
+  const backTarget = resolveBackTarget(back, profile.slug);
   return (
     <main className="min-h-screen">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <Link href={`/@${profile.slug}`} className="inline-flex items-center gap-2 text-sm text-muted hover:text-ink"><ArrowLeft aria-hidden size={16} />Wroc do profilu</Link>
+        <Link href={backTarget.href} className="inline-flex items-center gap-2 text-sm text-muted hover:text-ink"><ArrowLeft aria-hidden size={16} />{backTarget.label}</Link>
         <section className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
           <PhotoCarousel photos={project.photos} alt={project.coverAlt || project.title} />
           <aside className="self-end border-t border-ink/10 pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">

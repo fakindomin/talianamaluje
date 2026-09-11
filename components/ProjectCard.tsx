@@ -24,7 +24,7 @@ function buildCrossfadeCss(keyframeName: string, count: number) {
   return `@keyframes ${keyframeName} { 0% { opacity: 0; } ${fadeInEnd.toFixed(2)}% { opacity: 1; } ${holdEnd.toFixed(2)}% { opacity: 1; } ${fadeOutEnd.toFixed(2)}% { opacity: 0; } 100% { opacity: 0; } }`;
 }
 
-export function ProjectCard({ project, priority = false }: { project: Project; priority?: boolean }) {
+export function ProjectCard({ project, priority = false, from }: { project: Project; priority?: boolean; from?: string }) {
   const photos = project.photos;
   const count = photos.length;
   const keyframeName = `cf-${project.id.replace(/[^a-zA-Z0-9]/g, "")}`;
@@ -61,8 +61,10 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
     });
   }
 
+  const href = from ? `/work/${project.slug}?back=${encodeURIComponent(from)}` : `/work/${project.slug}`;
+
   return (
-    <Link href={`/work/${project.slug}`} className="group block">
+    <Link href={href} className="group block">
       <div className="relative">
         {count > 1 && <style>{buildCrossfadeCss(keyframeName, count)}</style>}
         {backLayerCount >= 2 && (
