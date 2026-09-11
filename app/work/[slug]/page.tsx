@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -39,6 +40,18 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
             <p className="mt-4 text-sm text-muted">{project.dateLabel}</p>
             {project.modelName && <p className="mt-1 text-sm text-muted">Modelka: {project.modelName}</p>}
             <p className="mt-6 leading-7 text-muted">{project.description}</p>
+            {project.beforePhotos.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-sm font-medium">Przed</h2>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  {project.beforePhotos.map((photo) => (
+                    <div key={photo} className="relative aspect-[4/5] w-24 overflow-hidden rounded-md bg-soft-accent shadow-line">
+                      <Image src={photo} alt={`${project.title} — przed`} fill sizes="96px" className="object-cover" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="mt-8">
               <h2 className="text-sm font-medium">Uzyte kosmetyki</h2>
               <ul className="mt-3 space-y-2 text-sm text-muted">{project.products.map((product) => <li key={product} className="border-b border-ink/10 pb-2">{product}</li>)}</ul>

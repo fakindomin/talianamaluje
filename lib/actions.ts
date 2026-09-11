@@ -48,6 +48,7 @@ export async function addProject(formData: FormData) {
   const isPublic = formData.get("isPublic") === "on";
   const textColor = String(formData.get("textColor") || "#F7EFEA").trim();
   const photoUrls = getPhotoUrls(formData, "photoUrls");
+  const beforePhotoUrls = getPhotoUrls(formData, "beforePhotoUrls");
 
   if (!title || photoUrls.length === 0) {
     throw new Error("Tytul i przynajmniej jedno zdjecie sa wymagane.");
@@ -67,6 +68,7 @@ export async function addProject(formData: FormData) {
     cover_url: photoUrls[0],
     cover_alt: title,
     photo_urls: photoUrls,
+    before_photo_urls: beforePhotoUrls,
     products,
     is_public: isPublic,
     model_id: modelId,
@@ -113,6 +115,7 @@ export async function updateProject(id: string, formData: FormData) {
   const isPublic = formData.get("isPublic") === "on";
   const textColor = String(formData.get("textColor") || "#F7EFEA").trim();
   const newPhotoUrls = getPhotoUrls(formData, "photoUrls");
+  const newBeforePhotoUrls = getPhotoUrls(formData, "beforePhotoUrls");
 
   if (!title) throw new Error("Tytul jest wymagany.");
 
@@ -129,12 +132,17 @@ export async function updateProject(id: string, formData: FormData) {
 
   const supabase = getSupabase();
 
-  if (newPhotoUrls.length > 0) {
-    const { data: existing } = await supabase.from("projects").select("photo_urls").eq("id", id).maybeSingle();
-    const combined = [...(existing?.photo_urls ?? []), ...newPhotoUrls];
-    update.photo_urls = combined;
-    update.cover_url = combined[0];
-    update.cover_alt = title;
+  if (newPhotoUrls.length > 0 || newBeforePhotoUrls.length > 0) {
+    const { data: existing } = await supabase.from("projects").select("photo_urls, before_photo_urls").eq("id", id).maybeSingle();
+    if (newPhotoUrls.length > 0) {
+      const combined = [...(existing?.photo_urls ?? []), ...newPhotoUrls];
+      update.photo_urls = combined;
+      update.cover_url = combined[0];
+      update.cover_alt = title;
+    }
+    if (newBeforePhotoUrls.length > 0) {
+      update.before_photo_urls = [...(existing?.before_photo_urls ?? []), ...newBeforePhotoUrls];
+    }
   }
 
   update.model_id = await resolveModelId(formData, (update.cover_url as string) ?? null);
@@ -165,6 +173,21 @@ export async function removeProjectPhoto(id: string, photoUrl: string) {
   revalidatePath("/");
   revalidatePath("/tematyczne");
   revalidatePath("/modelki");
+  revalidatePath("/studio");
+  revalidatePath(`/studio/projekty/${id}/edytuj`);
+}
+
+export async function removeProjectBeforePhoto(id: string, photoUrl: string) {
+  const supabase = getSupabase();
+  const { data: existing, error: fetchError } = await supabase.from("projects").select("before_photo_urls").eq("id", id).maybeSingle();
+  if (fetchError) throw new Error(`Nie udalo sie pobrac projektu: ${fetchError.message}`);
+
+  const remaining = (existing?.before_photo_urls ?? []).filter((url: string) => url !== photoUrl);
+
+  const { error } = await supabase.from("projects").update({ before_photo_urls: remaining }).eq("id", id);
+  if (error) throw new Error(`Nie udalo sie usunac zdjecia: ${error.message}`);
+
+  revalidatePath("/");
   revalidatePath("/studio");
   revalidatePath(`/studio/projekty/${id}/edytuj`);
 }

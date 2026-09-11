@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, X } from "lucide-react";
 import { PhotoUploadField } from "@/components/PhotoUploadField";
 import { StudioSidebar } from "@/components/StudioSidebar";
-import { removeProjectPhoto, updateProject } from "@/lib/actions";
+import { removeProjectBeforePhoto, removeProjectPhoto, updateProject } from "@/lib/actions";
 import { getModels, getProjectById } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +23,8 @@ export default async function EdytujProjektPage({ params }: { params: Promise<{ 
       <section className="px-4 py-6 sm:px-6 lg:px-8">
         <Link href="/studio" className="inline-flex items-center gap-2 text-sm text-muted hover:text-ink"><ArrowLeft aria-hidden size={16} />Wroc do Portfolio</Link>
         <h1 className="mt-4 font-serif text-5xl font-semibold leading-none">Edytuj projekt</h1>
-        <div className="mt-6 flex max-w-xl flex-wrap gap-3">
+        <p className="mt-6 text-xs uppercase text-muted">Zdjecia w Portfolio</p>
+        <div className="mt-2 flex max-w-xl flex-wrap gap-3">
           {project.photos.map((photo) => (
             <div key={photo} className="relative aspect-[4/5] w-28 overflow-hidden rounded-md bg-soft-accent shadow-line">
               <Image src={photo} alt={project.coverAlt} fill sizes="112px" className="object-cover" />
@@ -41,6 +42,27 @@ export default async function EdytujProjektPage({ params }: { params: Promise<{ 
             </div>
           ))}
         </div>
+        {project.beforePhotos.length > 0 && (
+          <>
+            <p className="mt-6 text-xs uppercase text-muted">Zdjecia przed (nie pojawiaja sie w Portfolio)</p>
+            <div className="mt-2 flex max-w-xl flex-wrap gap-3">
+              {project.beforePhotos.map((photo) => (
+                <div key={photo} className="relative aspect-[4/5] w-28 overflow-hidden rounded-md bg-soft-accent shadow-line">
+                  <Image src={photo} alt={`${project.coverAlt} - przed`} fill sizes="112px" className="object-cover" />
+                  <form action={removeProjectBeforePhoto.bind(null, project.id, photo)} className="absolute right-1 top-1">
+                    <button
+                      type="submit"
+                      aria-label="Usun zdjecie"
+                      className="rounded-full bg-ink/70 p-1 text-white hover:bg-ink"
+                    >
+                      <X aria-hidden size={12} />
+                    </button>
+                  </form>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
         <form action={updateWithId} className="mt-6 max-w-xl space-y-5">
           <label className="block text-sm">
             Tytul (podpis kafelka)*
@@ -74,6 +96,7 @@ export default async function EdytujProjektPage({ params }: { params: Promise<{ 
             <input name="newModelName" className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. Klaudia" />
           </label>
           <PhotoUploadField name="photoUrls" folder="projects" multiple label="Dodaj kolejne zdjecia (zostaw puste, zeby nic nie dodawac)" />
+          <PhotoUploadField name="beforePhotoUrls" folder="projects" multiple label="Dodaj zdjecia przed (opcjonalnie, nie pojawiaja sie w Portfolio)" />
           <label className="block text-sm">
             Kolor tekstu na kafelku (dobierz pod jasnosc zdjecia)
             <input type="color" name="textColor" defaultValue={project.textColor} className="mt-2 h-11 w-full border border-ink/15 bg-canvas px-2" />
