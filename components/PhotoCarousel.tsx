@@ -16,7 +16,7 @@ export function PhotoCarousel({ photos, alt }: { photos: string[]; alt: string }
   if (photos.length <= 1) {
     return (
       <div className="relative min-h-[70vh] overflow-hidden rounded-md bg-soft-accent shadow-line">
-        <Image src={photos[0]} alt={alt} fill priority sizes="(max-width: 1024px) 100vw, 70vw" className="object-cover" />
+        <Image src={photos[0]} alt={alt} fill priority sizes="(max-width: 1024px) 100vw, 70vw" className="object-contain" />
       </div>
     );
   }
@@ -35,7 +35,7 @@ export function PhotoCarousel({ photos, alt }: { photos: string[]; alt: string }
               fill
               priority={index === 0}
               sizes="(max-width: 1024px) 100vw, 70vw"
-              className="object-cover"
+              className="object-contain"
             />
           </div>
         ))}
