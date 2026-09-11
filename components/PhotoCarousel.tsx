@@ -62,7 +62,7 @@ export function PhotoCarousel({ photos, alt }: { photos: string[]; alt: string }
         type="button"
         onClick={() => scrollByPage(-1)}
         aria-label="Poprzednie zdjecie"
-        className="absolute left-3 top-1/2 hidden -translate-y-1/2 rounded-full bg-white/85 p-2 text-ink shadow-line hover:bg-white sm:block"
+        className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/85 p-2 text-ink shadow-line hover:bg-white"
       >
         <ChevronLeft size={20} />
       </button>
@@ -70,7 +70,7 @@ export function PhotoCarousel({ photos, alt }: { photos: string[]; alt: string }
         type="button"
         onClick={() => scrollByPage(1)}
         aria-label="Nastepne zdjecie"
-        className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-full bg-white/85 p-2 text-ink shadow-line hover:bg-white sm:block"
+        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/85 p-2 text-ink shadow-line hover:bg-white"
       >
         <ChevronRight size={20} />
       </button>
