@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LockKeyhole } from "lucide-react";
+import { artist } from "@/lib/data";
 
 type CategoryTab = "portfolio" | "modelki" | "tematyczne";
 
@@ -19,7 +20,7 @@ export function Header({ active }: { active?: CategoryTab } = {}) {
           talianamaluje
         </Link>
         <nav className="flex items-center gap-2 text-sm text-muted">
-          <Link className="px-3 py-2 hover:text-ink" href="/@nina-kaminska">Profil</Link>
+          <Link className="px-3 py-2 hover:text-ink" href={`/@${artist.slug}`}>Profil</Link>
           <Link className="inline-flex items-center gap-2 rounded border border-ink/15 px-3 py-2 text-ink hover:bg-soft-accent" href="/login"><LockKeyhole aria-hidden size={16} />Studio</Link>
         </nav>
       </div>
