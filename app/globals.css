@@ -32,8 +32,8 @@ button, input, textarea, select { font: inherit; }
 }
 
 @keyframes tile-kenburns {
-  0% { transform: scale(1.08) translate(0, 0); }
-  100% { transform: scale(1.16) translate(-2.5%, -2%); }
+  0% { transform: scale(1.02) translate(0, 0); }
+  100% { transform: scale(1.08) translate(-2%, -1.5%); }
 }
 
 @keyframes tile-text-drift {
