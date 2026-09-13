@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 import { BarcodeScanButton } from "./BarcodeScanButton";
-import { lookupBarcode } from "@/lib/actions";
+import { analyzeProductPhoto, lookupBarcode } from "@/lib/actions";
 
 type OpenBeautyFactsProduct = {
   product_name?: string;
@@ -30,7 +30,7 @@ export function CosmeticForm({
   const [name, setName] = useState(defaultValues?.name ?? "");
   const [brand, setBrand] = useState(defaultValues?.brand ?? "");
   const [category, setCategory] = useState(defaultValues?.category ?? "");
-  const [lookupStatus, setLookupStatus] = useState<"idle" | "loading" | "found" | "not-found" | "error">("idle");
+  const [lookupStatus, setLookupStatus] = useState<"idle" | "loading" | "analyzing-photo" | "found" | "found-photo" | "not-found" | "error">("idle");
   const lastLookedUp = useRef(defaultValues?.barcode ?? "");
 
   const applyMatch = useCallback((match: BarcodeMatch) => {
@@ -81,6 +81,27 @@ export function CosmeticForm({
     [applyMatch]
   );
 
+  const handlePhotoFallback = useCallback(async (photo: { base64: string; mimeType: string }) => {
+    setLookupStatus("analyzing-photo");
+    try {
+      const result = await analyzeProductPhoto(photo);
+      if (!result) {
+        setLookupStatus("not-found");
+        return;
+      }
+      if (result.barcode) {
+        setBarcode(result.barcode);
+        lastLookedUp.current = result.barcode;
+      }
+      if (result.brand) setBrand(result.brand);
+      if (result.name) setName(result.name);
+      if (result.category) setCategory(result.category);
+      setLookupStatus("found-photo");
+    } catch {
+      setLookupStatus("error");
+    }
+  }, []);
+
   return (
     <form action={action} className="mt-8 max-w-xl space-y-5">
       <div className="block text-sm">
@@ -97,11 +118,13 @@ export function CosmeticForm({
             className="w-full border border-ink/15 bg-canvas px-3 py-3"
             placeholder="np. 5901234123457"
           />
-          <BarcodeScanButton onDetected={handleDetected} />
+          <BarcodeScanButton onDetected={handleDetected} onPhotoFallback={handlePhotoFallback} />
         </div>
         {lookupStatus === "loading" && <p className="mt-1 text-xs text-muted">Szukam produktu w bazie...</p>}
+        {lookupStatus === "analyzing-photo" && <p className="mt-1 text-xs text-muted">Nie znaleziono kodu na zdjeciu — AI czyta etykiete...</p>}
         {lookupStatus === "found" && <p className="mt-1 text-xs text-accent">Znaleziono produkt — pola zostaly uzupelnione.</p>}
-        {lookupStatus === "not-found" && <p className="mt-1 text-xs text-muted">Nie znaleziono tego kodu w zadnej z baz — uzupelnij recznie.</p>}
+        {lookupStatus === "found-photo" && <p className="mt-1 text-xs text-accent">Odczytano etykiete ze zdjecia — pola zostaly uzupelnione.</p>}
+        {lookupStatus === "not-found" && <p className="mt-1 text-xs text-muted">Nie udalo sie rozpoznac produktu — uzupelnij recznie.</p>}
         {lookupStatus === "error" && <p className="mt-1 text-xs text-muted">Nie udalo sie sprawdzic bazy — uzupelnij recznie.</p>}
       </div>
       <label className="block text-sm">

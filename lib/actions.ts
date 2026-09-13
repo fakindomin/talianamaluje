@@ -416,36 +416,74 @@ export async function lookupBarcode(code: string): Promise<BarcodeLookupResult> 
   return lookupBarcodeWithGemini(code);
 }
 
+async function callGemini(parts: unknown[], useGrounding: boolean): Promise<string | null> {
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) return null;
+
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+    body: JSON.stringify({
+      contents: [{ parts }],
+      ...(useGrounding ? { tools: [{ google_search: {} }] } : {})
+    })
+  });
+  const data: { candidates?: { content?: { parts?: { text?: string }[] } }[] } = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
+}
+
+function extractJsonObject<T>(text: string): T | null {
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) return null;
+  try {
+    return JSON.parse(jsonMatch[0]) as T;
+  } catch {
+    return null;
+  }
+}
+
 // Last resort: ask Gemini to search the web for the barcode (Google Search grounding),
 // only used when none of the free product databases above had it. Skipped entirely if
 // GEMINI_API_KEY isn't configured, so this stays fully optional.
 async function lookupBarcodeWithGemini(code: string): Promise<BarcodeLookupResult> {
-  const apiKey = process.env.GEMINI_API_KEY?.trim();
-  if (!apiKey) return null;
-
   try {
     const prompt = `Wyszukaj w internecie produkt kosmetyczny o kodzie kreskowym (EAN/UPC) ${code}. Odpowiedz WYLACZNIE obiektem JSON, bez zadnego dodatkowego tekstu ani formatowania markdown, w formacie: {"brand": "marka", "name": "pelna nazwa produktu", "category": "kategoria np. podklad, roz, szminka, tusz do rzes"}. Jesli ktoregos pola nie da sie ustalic, zostaw pusty string "".`;
-
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        tools: [{ google_search: {} }]
-      })
-    });
-    const data: { candidates?: { content?: { parts?: { text?: string }[] } }[] } = await res.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const text = await callGemini([{ text: prompt }], true);
     if (!text) return null;
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return null;
-
-    const parsed: { brand?: string; name?: string; category?: string } = JSON.parse(jsonMatch[0]);
+    const parsed = extractJsonObject<{ brand?: string; name?: string; category?: string }>(text);
+    if (!parsed) return null;
     const brand = parsed.brand?.trim() ?? "";
     const name = parsed.name?.trim() ?? "";
     const category = parsed.category?.trim() ?? "";
     if (brand || name || category) return { brand, name, category };
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export type ProductPhotoResult = { barcode: string; brand: string; name: string; category: string } | null;
+
+// Used when a scanned photo has no decodable barcode: ask Gemini to read the label
+// (and any printed EAN digits) directly from the image. Pure vision, no search grounding
+// needed, so this works even without billing enabled on the Gemini API key.
+export async function analyzeProductPhoto(photo: { base64: string; mimeType: string }): Promise<ProductPhotoResult> {
+  try {
+    const prompt = `To zdjecie opakowania kosmetyku. Jesli widac kod kreskowy, odczytaj cyfry wydrukowane pod nim (EAN/UPC). Odczytaj tez z etykiety: marke, pelna nazwe produktu i kategorie (np. podklad, roz, szminka, tusz do rzes). Odpowiedz WYLACZNIE obiektem JSON, bez zadnego dodatkowego tekstu ani formatowania markdown: {"barcode": "cyfry kodu lub pusty string", "brand": "...", "name": "...", "category": "..."}. Jesli ktoregos pola nie da sie odczytac, zostaw pusty string "".`;
+    const text = await callGemini(
+      [{ text: prompt }, { inlineData: { mimeType: photo.mimeType, data: photo.base64 } }],
+      false
+    );
+    if (!text) return null;
+
+    const parsed = extractJsonObject<{ barcode?: string; brand?: string; name?: string; category?: string }>(text);
+    if (!parsed) return null;
+    const barcode = parsed.barcode?.trim() ?? "";
+    const brand = parsed.brand?.trim() ?? "";
+    const name = parsed.name?.trim() ?? "";
+    const category = parsed.category?.trim() ?? "";
+    if (barcode || brand || name || category) return { barcode, brand, name, category };
     return null;
   } catch {
     return null;
