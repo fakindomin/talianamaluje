@@ -196,6 +196,36 @@ export async function getCosmeticById(id: string): Promise<Cosmetic | null> {
   return data;
 }
 
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  notes: string;
+};
+
+export async function getCalendarEvents(): Promise<CalendarEvent[]> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("calendar_events")
+    .select("id, title, event_date, event_time, notes")
+    .order("event_date", { ascending: true });
+  if (error) throw new Error(`Nie udalo sie pobrac wydarzen: ${error.message}`);
+  return (data ?? []).map((row) => ({ id: row.id, title: row.title, date: row.event_date, time: row.event_time, notes: row.notes }));
+}
+
+export async function getCalendarEventById(id: string): Promise<CalendarEvent | null> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("calendar_events")
+    .select("id, title, event_date, event_time, notes")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(`Nie udalo sie pobrac wydarzenia: ${error.message}`);
+  if (!data) return null;
+  return { id: data.id, title: data.title, date: data.event_date, time: data.event_time, notes: data.notes };
+}
+
 export async function getModels(): Promise<Model[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase

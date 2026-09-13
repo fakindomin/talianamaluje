@@ -489,3 +489,44 @@ export async function analyzeProductPhoto(photo: { base64: string; mimeType: str
     return null;
   }
 }
+
+export async function addCalendarEvent(formData: FormData) {
+  const title = String(formData.get("title") || "").trim();
+  const date = String(formData.get("date") || "").trim();
+  const time = String(formData.get("time") || "").trim();
+  const notes = String(formData.get("notes") || "").trim();
+
+  if (!title || !date) throw new Error("Tytul i data sa wymagane.");
+
+  const supabase = getSupabase();
+  const { error } = await supabase.from("calendar_events").insert({ title, event_date: date, event_time: time, notes });
+  if (error) throw new Error(`Nie udalo sie zapisac wydarzenia: ${error.message}`);
+
+  revalidatePath("/studio/kalendarz");
+  redirect(`/studio/kalendarz?month=${date.slice(0, 7)}`);
+}
+
+export async function updateCalendarEvent(id: string, formData: FormData) {
+  const title = String(formData.get("title") || "").trim();
+  const date = String(formData.get("date") || "").trim();
+  const time = String(formData.get("time") || "").trim();
+  const notes = String(formData.get("notes") || "").trim();
+
+  if (!title || !date) throw new Error("Tytul i data sa wymagane.");
+
+  const supabase = getSupabase();
+  const { error } = await supabase.from("calendar_events").update({ title, event_date: date, event_time: time, notes }).eq("id", id);
+  if (error) throw new Error(`Nie udalo sie zaktualizowac wydarzenia: ${error.message}`);
+
+  revalidatePath("/studio/kalendarz");
+  redirect(`/studio/kalendarz?month=${date.slice(0, 7)}`);
+}
+
+export async function deleteCalendarEvent(id: string, month: string) {
+  const supabase = getSupabase();
+  const { error } = await supabase.from("calendar_events").delete().eq("id", id);
+  if (error) throw new Error(`Nie udalo sie usunac wydarzenia: ${error.message}`);
+
+  revalidatePath("/studio/kalendarz");
+  redirect(`/studio/kalendarz?month=${month}`);
+}
