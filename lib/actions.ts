@@ -410,8 +410,44 @@ export async function lookupBarcode(code: string): Promise<BarcodeLookupResult> 
       if (brand || name || category) return { brand, name, category };
     }
   } catch {
-    // no more sources to try
+    // try the last source
   }
 
-  return null;
+  return lookupBarcodeWithGemini(code);
+}
+
+// Last resort: ask Gemini to search the web for the barcode (Google Search grounding),
+// only used when none of the free product databases above had it. Skipped entirely if
+// GEMINI_API_KEY isn't configured, so this stays fully optional.
+async function lookupBarcodeWithGemini(code: string): Promise<BarcodeLookupResult> {
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) return null;
+
+  try {
+    const prompt = `Wyszukaj w internecie produkt kosmetyczny o kodzie kreskowym (EAN/UPC) ${code}. Odpowiedz WYLACZNIE obiektem JSON, bez zadnego dodatkowego tekstu ani formatowania markdown, w formacie: {"brand": "marka", "name": "pelna nazwa produktu", "category": "kategoria np. podklad, roz, szminka, tusz do rzes"}. Jesli ktoregos pola nie da sie ustalic, zostaw pusty string "".`;
+
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ google_search: {} }]
+      })
+    });
+    const data: { candidates?: { content?: { parts?: { text?: string }[] } }[] } = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) return null;
+
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+
+    const parsed: { brand?: string; name?: string; category?: string } = JSON.parse(jsonMatch[0]);
+    const brand = parsed.brand?.trim() ?? "";
+    const name = parsed.name?.trim() ?? "";
+    const category = parsed.category?.trim() ?? "";
+    if (brand || name || category) return { brand, name, category };
+    return null;
+  } catch {
+    return null;
+  }
 }
