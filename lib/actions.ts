@@ -380,3 +380,38 @@ export async function deleteCosmetic(id: string) {
   revalidatePath("/studio/kosmetyki");
   redirect("/studio/kosmetyki");
 }
+
+export type BarcodeLookupResult = { brand: string; name: string; category: string } | null;
+
+// Open Beauty Facts is queried client-side (it allows CORS); these two don't, so
+// they're looked up here server-side as a fallback when it comes up empty.
+export async function lookupBarcode(code: string): Promise<BarcodeLookupResult> {
+  try {
+    const res = await fetch(`https://world.openproductfacts.org/api/v0/product/${code}.json`);
+    const data: { status: number; product?: { product_name?: string; brands?: string; categories?: string } } = await res.json();
+    if (data.status === 1 && data.product) {
+      const brand = data.product.brands?.split(",")[0]?.trim() ?? "";
+      const name = data.product.product_name?.trim() ?? "";
+      const category = data.product.categories?.split(",")[0]?.trim() ?? "";
+      if (brand || name || category) return { brand, name, category };
+    }
+  } catch {
+    // try the next source
+  }
+
+  try {
+    const res = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`);
+    const data: { items?: { title?: string; brand?: string; category?: string }[] } = await res.json();
+    const item = data.items?.[0];
+    if (item) {
+      const brand = item.brand?.trim() ?? "";
+      const name = item.title?.trim() ?? "";
+      const category = item.category?.split(">").pop()?.trim() ?? "";
+      if (brand || name || category) return { brand, name, category };
+    }
+  } catch {
+    // no more sources to try
+  }
+
+  return null;
+}
