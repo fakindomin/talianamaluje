@@ -24,7 +24,17 @@ function buildCrossfadeCss(keyframeName: string, count: number) {
   return `@keyframes ${keyframeName} { 0% { opacity: 0; } ${fadeInEnd.toFixed(2)}% { opacity: 1; } ${holdEnd.toFixed(2)}% { opacity: 1; } ${fadeOutEnd.toFixed(2)}% { opacity: 0; } 100% { opacity: 0; } }`;
 }
 
-export function ProjectCard({ project, priority = false, from }: { project: Project; priority?: boolean; from?: string }) {
+export function ProjectCard({
+  project,
+  priority = false,
+  from,
+  aspect = "aspect-[4/5]"
+}: {
+  project: Project;
+  priority?: boolean;
+  from?: string;
+  aspect?: string;
+}) {
   const photos = project.photos;
   const count = photos.length;
   const keyframeName = `cf-${project.id.replace(/[^a-zA-Z0-9]/g, "")}`;
@@ -77,7 +87,7 @@ export function ProjectCard({ project, priority = false, from }: { project: Proj
             {renderLayer(1, false)}
           </div>
         )}
-        <article className="relative aspect-[4/5] overflow-hidden rounded-md bg-soft-accent shadow-line">
+        <article className={`relative ${aspect} overflow-hidden rounded-md bg-soft-accent shadow-line`}>
           {renderLayer(0, true)}
           <div className="pointer-events-none absolute inset-0 tile-text-drift">
             <div className="absolute right-3 top-3 text-xs" style={{ color: project.textColor }}>{project.dateLabel}</div>

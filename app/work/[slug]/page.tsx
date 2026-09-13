@@ -51,17 +51,22 @@ export default async function WorkPage({
     <main className="min-h-screen">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <Link href={backTarget.href} className="inline-flex items-center gap-2 text-sm text-muted hover:text-ink"><ArrowLeft aria-hidden size={16} />{backTarget.label}</Link>
-        <section className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="mt-6 grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
           <PhotoCarousel photos={project.photos} alt={project.coverAlt || project.title} />
-          <aside className="self-end border-t border-ink/10 pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-            <p className="text-xs uppercase text-accent">{project.style}</p>
-            <h1 className="mt-2 font-serif text-6xl font-semibold leading-none">{project.title}</h1>
-            <p className="mt-4 text-sm text-muted">{project.dateLabel}</p>
-            {project.modelName && <p className="mt-1 text-sm text-muted">Modelka: {project.modelName}</p>}
-            <p className="mt-6 leading-7 text-muted">{project.description}</p>
+          <aside className="border-t border-ink/10 pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+            <p className="text-xs uppercase tracking-[0.08em] text-accent">{project.style}{project.dateLabel ? ` · ${project.dateLabel}` : ""}</p>
+            <h1 className="mt-3 font-serif text-5xl font-semibold leading-[0.98] sm:text-6xl">{project.title}</h1>
+            {project.modelName && <p className="mt-4 text-sm text-muted">Modelka: {project.modelName}</p>}
+            {project.description && (
+              <>
+                <div className="mt-6 h-px bg-ink/10" />
+                <p className="mt-6 text-sm leading-7 text-muted">{project.description}</p>
+              </>
+            )}
             {project.beforePhotos.length > 0 && (
               <div className="mt-8">
-                <h2 className="text-sm font-medium">Przed</h2>
+                <div className="h-px bg-ink/10" />
+                <h2 className="mt-6 text-sm font-medium">Przed</h2>
                 <div className="mt-3 flex flex-wrap gap-3">
                   {project.beforePhotos.map((photo) => (
                     <div key={photo} className="relative aspect-[4/5] w-24 overflow-hidden rounded-md bg-soft-accent shadow-line">
@@ -73,7 +78,8 @@ export default async function WorkPage({
             )}
             {project.cosmetics.length > 0 && (
               <div className="mt-8">
-                <h2 className="text-sm font-medium">Uzyte kosmetyki</h2>
+                <div className="h-px bg-ink/10" />
+                <h2 className="mt-6 text-sm font-medium">Uzyte kosmetyki</h2>
                 <ul className="mt-3 space-y-2 text-sm text-muted">
                   {project.cosmetics.map((cosmetic) => (
                     <li key={cosmetic.id} className="border-b border-ink/10 pb-2">
