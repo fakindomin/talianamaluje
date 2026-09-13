@@ -9,5 +9,3 @@ export const artist = {
   avatarAlt: "Portret makijazystki w naturalnym swietle",
   specialties: ["Editorial", "Bridal", "Soft glam", "Beauty shoot"]
 };
-
-export const studioStats = { privateProjects: 7, publishedProjects: 4, models: 12, packingProgress: "8/17" };

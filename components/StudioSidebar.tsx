@@ -3,14 +3,14 @@ import Link from "next/link";
 import { CalendarDays, CheckSquare, FlaskConical, Images, LogOut, Settings, UserRound, UsersRound } from "lucide-react";
 import { logout } from "@/lib/auth-actions";
 
-type StudioTab = "portfolio" | "modelki" | "profil" | "kosmetyki" | "kalendarz";
+type StudioTab = "portfolio" | "modelki" | "profil" | "kosmetyki" | "kalendarz" | "na-wyjazd";
 
 const nav: { label: string; icon: typeof Images; href: string; key?: StudioTab }[] = [
   { label: "Portfolio", icon: Images, href: "/studio", key: "portfolio" },
   { label: "Kosmetyki", icon: FlaskConical, href: "/studio/kosmetyki", key: "kosmetyki" },
   { label: "Modelki", icon: UsersRound, href: "/studio/modelki", key: "modelki" },
   { label: "Kalendarz", icon: CalendarDays, href: "/studio/kalendarz", key: "kalendarz" },
-  { label: "Na wyjazd", icon: CheckSquare, href: "#" },
+  { label: "Na wyjazd", icon: CheckSquare, href: "/studio/na-wyjazd", key: "na-wyjazd" },
   { label: "Profil", icon: UserRound, href: "/studio/profil", key: "profil" },
   { label: "Ustawienia", icon: Settings, href: "#" }
 ];

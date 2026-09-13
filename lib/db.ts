@@ -226,6 +226,22 @@ export async function getCalendarEventById(id: string): Promise<CalendarEvent | 
   return { id: data.id, title: data.title, date: data.event_date, time: data.event_time, notes: data.notes };
 }
 
+export type PackingItem = {
+  id: string;
+  label: string;
+  checked: boolean;
+};
+
+export async function getPackingItems(): Promise<PackingItem[]> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("packing_items")
+    .select("id, label, checked")
+    .order("created_at", { ascending: true });
+  if (error) throw new Error(`Nie udalo sie pobrac listy pakowania: ${error.message}`);
+  return data ?? [];
+}
+
 export async function getModels(): Promise<Model[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase

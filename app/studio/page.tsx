@@ -1,14 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { StudioSidebar } from "@/components/StudioSidebar";
-import { studioStats } from "@/lib/data";
-import { getCosmetics, getModels, getProjects } from "@/lib/db";
+import { getCosmetics, getModels, getPackingItems, getProjects } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function StudioPage() {
-  const [projects, cosmetics, models] = await Promise.all([getProjects(), getCosmetics(), getModels()]);
+  const [projects, cosmetics, models, packingItems] = await Promise.all([getProjects(), getCosmetics(), getModels(), getPackingItems()]);
   const publicCount = projects.filter((project) => project.public).length;
+  const packingChecked = packingItems.filter((item) => item.checked).length;
+  const packingTotal = packingItems.length;
+  const packingProgress = packingTotal > 0 ? Math.round((packingChecked / packingTotal) * 100) : 0;
 
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
@@ -22,7 +24,7 @@ export default async function StudioPage() {
           <Link href="/studio/projekty/nowy" className="block w-full bg-accent px-4 py-3 text-center text-sm font-medium text-white md:w-auto">Nowy projekt</Link>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-5">
-          {[["Prywatne", projects.length - publicCount], ["Publiczne", publicCount], ["Kosmetyki", cosmetics.length], ["Modelki", models.length], ["Spakowane", studioStats.packingProgress]].map(([label, value]) => <div key={label} className="border border-ink/10 bg-white/35 p-4"><p className="text-xs uppercase text-muted">{label}</p><p className="mt-2 font-serif text-3xl font-semibold">{value}</p></div>)}
+          {[["Prywatne", projects.length - publicCount], ["Publiczne", publicCount], ["Kosmetyki", cosmetics.length], ["Modelki", models.length], ["Spakowane", `${packingChecked}/${packingTotal}`]].map(([label, value]) => <div key={label} className="border border-ink/10 bg-white/35 p-4"><p className="text-xs uppercase text-muted">{label}</p><p className="mt-2 font-serif text-3xl font-semibold">{value}</p></div>)}
         </div>
         <div className="mt-8 grid gap-8 xl:grid-cols-[1fr_360px]">
           <div>
@@ -57,7 +59,20 @@ export default async function StudioPage() {
                 </div>
               )}
             </section>
-            <section className="border border-ink/10 bg-white/35 p-4"><h2 className="font-serif text-3xl font-semibold">Najblizszy wyjazd</h2><p className="mt-3 text-sm leading-6 text-muted">Checklisty beda trwale zapisywane i generowane z wybranych projektow. Reset wymaga potwierdzenia.</p><div className="mt-4 h-2 bg-soft-accent"><div className="h-2 w-[47%] bg-accent" /></div></section>
+            <section className="border border-ink/10 bg-white/35 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-serif text-3xl font-semibold">Na wyjazd</h2>
+                <Link href="/studio/na-wyjazd" className="text-sm text-accent hover:underline">Zobacz liste</Link>
+              </div>
+              {packingTotal === 0 ? (
+                <p className="mt-3 text-sm text-muted">Brak jeszcze zadnych pozycji na liscie pakowania.</p>
+              ) : (
+                <>
+                  <p className="mt-3 text-sm leading-6 text-muted">Spakowane {packingChecked} z {packingTotal} pozycji.</p>
+                  <div className="mt-4 h-2 bg-soft-accent"><div className="h-2 bg-accent" style={{ width: `${packingProgress}%` }} /></div>
+                </>
+              )}
+            </section>
           </aside>
         </div>
       </section>

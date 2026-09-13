@@ -530,3 +530,43 @@ export async function deleteCalendarEvent(id: string, month: string) {
   revalidatePath("/studio/kalendarz");
   redirect(`/studio/kalendarz?month=${month}`);
 }
+
+export async function addPackingItem(formData: FormData) {
+  const label = String(formData.get("label") || "").trim();
+  if (!label) throw new Error("Nazwa pozycji jest wymagana.");
+
+  const supabase = getSupabase();
+  const { error } = await supabase.from("packing_items").insert({ label, checked: false });
+  if (error) throw new Error(`Nie udalo sie dodac pozycji: ${error.message}`);
+
+  revalidatePath("/studio/na-wyjazd");
+  revalidatePath("/studio");
+}
+
+export async function togglePackingItem(id: string, checked: boolean) {
+  const supabase = getSupabase();
+  const { error } = await supabase.from("packing_items").update({ checked }).eq("id", id);
+  if (error) throw new Error(`Nie udalo sie zaktualizowac pozycji: ${error.message}`);
+
+  revalidatePath("/studio/na-wyjazd");
+  revalidatePath("/studio");
+}
+
+export async function deletePackingItem(id: string) {
+  const supabase = getSupabase();
+  const { error } = await supabase.from("packing_items").delete().eq("id", id);
+  if (error) throw new Error(`Nie udalo sie usunac pozycji: ${error.message}`);
+
+  revalidatePath("/studio/na-wyjazd");
+  revalidatePath("/studio");
+}
+
+export async function resetPackingList() {
+  const supabase = getSupabase();
+  const { error } = await supabase.from("packing_items").update({ checked: false }).neq("id", "00000000-0000-0000-0000-000000000000");
+  if (error) throw new Error(`Nie udalo sie zresetowac listy: ${error.message}`);
+
+  revalidatePath("/studio/na-wyjazd");
+  revalidatePath("/studio");
+  redirect("/studio/na-wyjazd");
+}
