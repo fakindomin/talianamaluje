@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { isValidHexColor } from "@/lib/color";
+import { DEFAULT_ACCENT_COLOR, DEFAULT_CANVAS_COLOR, isValidHexColor } from "@/lib/color";
 import { getSupabase } from "@/lib/db";
 
 function slugify(input: string) {
@@ -326,11 +326,26 @@ export async function updateProfile(formData: FormData) {
 
 export async function updateSettings(formData: FormData) {
   const accentColor = String(formData.get("accentColor") || "").trim();
-  if (!isValidHexColor(accentColor)) throw new Error("Nieprawidlowy format koloru.");
+  const canvasColor = String(formData.get("canvasColor") || "").trim();
+  if (!isValidHexColor(accentColor) || !isValidHexColor(canvasColor)) throw new Error("Nieprawidlowy format koloru.");
 
   const supabase = getSupabase();
-  const { error } = await supabase.from("profile").update({ accent_color: accentColor }).eq("id", "default");
+  const { error } = await supabase.from("profile").update({ accent_color: accentColor, canvas_color: canvasColor }).eq("id", "default");
   if (error) throw new Error(`Nie udalo sie zapisac ustawien: ${error.message}`);
+
+  revalidatePath("/");
+  revalidatePath("/tematyczne");
+  revalidatePath("/modelki");
+  revalidatePath("/@nina-kaminska");
+  revalidatePath("/studio");
+  revalidatePath("/studio/ustawienia");
+  redirect("/studio/ustawienia");
+}
+
+export async function resetSettings() {
+  const supabase = getSupabase();
+  const { error } = await supabase.from("profile").update({ accent_color: DEFAULT_ACCENT_COLOR, canvas_color: DEFAULT_CANVAS_COLOR }).eq("id", "default");
+  if (error) throw new Error(`Nie udalo sie zresetowac ustawien: ${error.message}`);
 
   revalidatePath("/");
   revalidatePath("/tematyczne");

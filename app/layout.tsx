@@ -34,7 +34,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const profile = await getProfile();
   const accentStyle = {
     "--color-accent-rgb": rgbTriplet(profile.accentColor),
-    "--color-soft-accent-rgb": softTintRgbTriplet(profile.accentColor)
+    "--color-soft-accent-rgb": softTintRgbTriplet(profile.accentColor),
+    "--color-canvas-rgb": rgbTriplet(profile.canvasColor)
   } as React.CSSProperties;
 
   return (

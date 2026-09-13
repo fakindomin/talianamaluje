@@ -1,5 +1,8 @@
 const HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
 
+export const DEFAULT_ACCENT_COLOR = "#7B3046";
+export const DEFAULT_CANVAS_COLOR = "#D9B9B0";
+
 function clamp(n: number): number {
   return Math.max(0, Math.min(255, Math.round(n)));
 }

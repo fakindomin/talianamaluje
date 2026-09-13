@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { artist } from "@/lib/data";
+import { DEFAULT_ACCENT_COLOR, DEFAULT_CANVAS_COLOR } from "@/lib/color";
 
 export function getSupabase() {
   const url = process.env.SUPABASE_URL?.trim();
@@ -142,19 +143,18 @@ export type Profile = {
   avatarAlt: string;
   specialties: string[];
   accentColor: string;
+  canvasColor: string;
 };
-
-const DEFAULT_ACCENT_COLOR = "#7B3046";
 
 export async function getProfile(): Promise<Profile> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("profile")
-    .select("display_name, brand_name, slug, city, service_area, bio, avatar_url, avatar_alt, specialties, accent_color")
+    .select("display_name, brand_name, slug, city, service_area, bio, avatar_url, avatar_alt, specialties, accent_color, canvas_color")
     .eq("id", "default")
     .maybeSingle();
   if (error) throw new Error(`Nie udalo sie pobrac profilu: ${error.message}`);
-  if (!data) return { ...artist, accentColor: DEFAULT_ACCENT_COLOR };
+  if (!data) return { ...artist, accentColor: DEFAULT_ACCENT_COLOR, canvasColor: DEFAULT_CANVAS_COLOR };
   return {
     displayName: data.display_name,
     brandName: data.brand_name,
@@ -165,7 +165,8 @@ export async function getProfile(): Promise<Profile> {
     avatar: data.avatar_url,
     avatarAlt: data.avatar_alt,
     specialties: data.specialties ?? [],
-    accentColor: data.accent_color || DEFAULT_ACCENT_COLOR
+    accentColor: data.accent_color || DEFAULT_ACCENT_COLOR,
+    canvasColor: data.canvas_color || DEFAULT_CANVAS_COLOR
   };
 }
 
