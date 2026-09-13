@@ -8,8 +8,8 @@ const config: Config = {
         canvas: "#D9B9B0",
         ink: "#242126",
         muted: "#6F6870",
-        accent: "#7B3046",
-        "soft-accent": "#E8D7D9",
+        accent: "rgb(var(--color-accent-rgb, 123 48 70) / <alpha-value>)",
+        "soft-accent": "rgb(var(--color-soft-accent-rgb, 232 215 217) / <alpha-value>)",
         "dark-canvas": "#161417"
       },
       fontFamily: {

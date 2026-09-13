@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { isValidHexColor } from "@/lib/color";
 import { getSupabase } from "@/lib/db";
 
 function slugify(input: string) {
@@ -321,6 +322,23 @@ export async function updateProfile(formData: FormData) {
   revalidatePath("/studio");
   revalidatePath("/studio/profil");
   redirect("/studio/profil");
+}
+
+export async function updateSettings(formData: FormData) {
+  const accentColor = String(formData.get("accentColor") || "").trim();
+  if (!isValidHexColor(accentColor)) throw new Error("Nieprawidlowy format koloru.");
+
+  const supabase = getSupabase();
+  const { error } = await supabase.from("profile").update({ accent_color: accentColor }).eq("id", "default");
+  if (error) throw new Error(`Nie udalo sie zapisac ustawien: ${error.message}`);
+
+  revalidatePath("/");
+  revalidatePath("/tematyczne");
+  revalidatePath("/modelki");
+  revalidatePath("/@nina-kaminska");
+  revalidatePath("/studio");
+  revalidatePath("/studio/ustawienia");
+  redirect("/studio/ustawienia");
 }
 
 export async function deleteModel(id: string) {

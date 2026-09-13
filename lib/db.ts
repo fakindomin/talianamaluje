@@ -141,17 +141,20 @@ export type Profile = {
   avatar: string;
   avatarAlt: string;
   specialties: string[];
+  accentColor: string;
 };
+
+const DEFAULT_ACCENT_COLOR = "#7B3046";
 
 export async function getProfile(): Promise<Profile> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("profile")
-    .select("display_name, brand_name, slug, city, service_area, bio, avatar_url, avatar_alt, specialties")
+    .select("display_name, brand_name, slug, city, service_area, bio, avatar_url, avatar_alt, specialties, accent_color")
     .eq("id", "default")
     .maybeSingle();
   if (error) throw new Error(`Nie udalo sie pobrac profilu: ${error.message}`);
-  if (!data) return artist;
+  if (!data) return { ...artist, accentColor: DEFAULT_ACCENT_COLOR };
   return {
     displayName: data.display_name,
     brandName: data.brand_name,
@@ -161,7 +164,8 @@ export async function getProfile(): Promise<Profile> {
     bio: data.bio,
     avatar: data.avatar_url,
     avatarAlt: data.avatar_alt,
-    specialties: data.specialties ?? []
+    specialties: data.specialties ?? [],
+    accentColor: data.accent_color || DEFAULT_ACCENT_COLOR
   };
 }
 
