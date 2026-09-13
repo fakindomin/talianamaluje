@@ -339,11 +339,12 @@ export async function addCosmetic(formData: FormData) {
   const category = String(formData.get("category") || "").trim();
   const shade = String(formData.get("shade") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
+  const barcode = String(formData.get("barcode") || "").trim();
 
   if (!name) throw new Error("Nazwa jest wymagana.");
 
   const supabase = getSupabase();
-  const { error } = await supabase.from("cosmetics").insert({ brand, name, category, shade, notes });
+  const { error } = await supabase.from("cosmetics").insert({ brand, name, category, shade, notes, barcode });
   if (error) throw new Error(`Nie udalo sie zapisac kosmetyku: ${error.message}`);
 
   revalidatePath("/studio");
@@ -357,11 +358,12 @@ export async function updateCosmetic(id: string, formData: FormData) {
   const category = String(formData.get("category") || "").trim();
   const shade = String(formData.get("shade") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
+  const barcode = String(formData.get("barcode") || "").trim();
 
   if (!name) throw new Error("Nazwa jest wymagana.");
 
   const supabase = getSupabase();
-  const { error } = await supabase.from("cosmetics").update({ brand, name, category, shade, notes }).eq("id", id);
+  const { error } = await supabase.from("cosmetics").update({ brand, name, category, shade, notes, barcode }).eq("id", id);
   if (error) throw new Error(`Nie udalo sie zaktualizowac kosmetyku: ${error.message}`);
 
   revalidatePath("/studio");

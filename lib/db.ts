@@ -84,7 +84,7 @@ async function attachCosmetics(supabase: ReturnType<typeof getSupabase>, project
   const allIds = Array.from(new Set(projects.flatMap((p) => p.cosmeticIds)));
   const cosmeticsById = new Map<string, Cosmetic>();
   if (allIds.length > 0) {
-    const { data, error } = await supabase.from("cosmetics").select("id, brand, name, category, shade, notes").in("id", allIds);
+    const { data, error } = await supabase.from("cosmetics").select("id, brand, name, category, shade, notes, barcode").in("id", allIds);
     if (error) throw new Error(`Nie udalo sie pobrac kosmetykow: ${error.message}`);
     (data ?? []).forEach((c) => cosmeticsById.set(c.id, c));
   }
@@ -172,13 +172,14 @@ export type Cosmetic = {
   category: string;
   shade: string;
   notes: string;
+  barcode: string;
 };
 
 export async function getCosmetics(): Promise<Cosmetic[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("cosmetics")
-    .select("id, brand, name, category, shade, notes")
+    .select("id, brand, name, category, shade, notes, barcode")
     .order("created_at", { ascending: false });
   if (error) throw new Error(`Nie udalo sie pobrac kosmetykow: ${error.message}`);
   return data ?? [];
@@ -188,7 +189,7 @@ export async function getCosmeticById(id: string): Promise<Cosmetic | null> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("cosmetics")
-    .select("id, brand, name, category, shade, notes")
+    .select("id, brand, name, category, shade, notes, barcode")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`Nie udalo sie pobrac kosmetyku: ${error.message}`);
