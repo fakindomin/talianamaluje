@@ -148,6 +148,36 @@ export async function getProfile(): Promise<Profile> {
   };
 }
 
+export type Cosmetic = {
+  id: string;
+  brand: string;
+  name: string;
+  category: string;
+  shade: string;
+  notes: string;
+};
+
+export async function getCosmetics(): Promise<Cosmetic[]> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("cosmetics")
+    .select("id, brand, name, category, shade, notes")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`Nie udalo sie pobrac kosmetykow: ${error.message}`);
+  return data ?? [];
+}
+
+export async function getCosmeticById(id: string): Promise<Cosmetic | null> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("cosmetics")
+    .select("id, brand, name, category, shade, notes")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(`Nie udalo sie pobrac kosmetyku: ${error.message}`);
+  return data;
+}
+
 export async function getModels(): Promise<Model[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase

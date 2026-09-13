@@ -1,13 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { StudioSidebar } from "@/components/StudioSidebar";
-import { cosmetics, studioStats } from "@/lib/data";
-import { getProjects } from "@/lib/db";
+import { studioStats } from "@/lib/data";
+import { getCosmetics, getProjects } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function StudioPage() {
-  const projects = await getProjects();
+  const [projects, cosmetics] = await Promise.all([getProjects(), getCosmetics()]);
   const publicCount = projects.filter((project) => project.public).length;
 
   return (
@@ -22,7 +22,7 @@ export default async function StudioPage() {
           <Link href="/studio/projekty/nowy" className="block w-full bg-accent px-4 py-3 text-center text-sm font-medium text-white md:w-auto">Nowy projekt</Link>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-5">
-          {[["Prywatne", projects.length - publicCount], ["Publiczne", publicCount], ["Kosmetyki", studioStats.cosmetics], ["Modelki", studioStats.models], ["Spakowane", studioStats.packingProgress]].map(([label, value]) => <div key={label} className="border border-ink/10 bg-white/35 p-4"><p className="text-xs uppercase text-muted">{label}</p><p className="mt-2 font-serif text-3xl font-semibold">{value}</p></div>)}
+          {[["Prywatne", projects.length - publicCount], ["Publiczne", publicCount], ["Kosmetyki", cosmetics.length], ["Modelki", studioStats.models], ["Spakowane", studioStats.packingProgress]].map(([label, value]) => <div key={label} className="border border-ink/10 bg-white/35 p-4"><p className="text-xs uppercase text-muted">{label}</p><p className="mt-2 font-serif text-3xl font-semibold">{value}</p></div>)}
         </div>
         <div className="mt-8 grid gap-8 xl:grid-cols-[1fr_360px]">
           <div>
@@ -39,7 +39,24 @@ export default async function StudioPage() {
             )}
           </div>
           <aside className="space-y-6">
-            <section className="border border-ink/10 bg-white/35 p-4"><h2 className="font-serif text-3xl font-semibold">Kosmetyki w pracy</h2><div className="mt-4 space-y-3">{cosmetics.map((item) => <div key={item.name} className="border-b border-ink/10 pb-3"><p className="font-medium">{item.brand} {item.name}</p><p className="text-sm text-muted">{item.type} · uzyty w {item.usedIn} projektach</p></div>)}</div></section>
+            <section className="border border-ink/10 bg-white/35 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-serif text-3xl font-semibold">Kosmetyki</h2>
+                <Link href="/studio/kosmetyki" className="text-sm text-accent hover:underline">Zobacz wszystkie</Link>
+              </div>
+              {cosmetics.length === 0 ? (
+                <p className="mt-4 text-sm text-muted">Brak jeszcze zadnych kosmetykow.</p>
+              ) : (
+                <div className="mt-4 space-y-3">
+                  {cosmetics.slice(0, 5).map((item) => (
+                    <div key={item.id} className="border-b border-ink/10 pb-3">
+                      <p className="font-medium">{item.brand} {item.name}</p>
+                      <p className="text-sm text-muted">{item.category || "Bez kategorii"}{item.shade ? ` · ${item.shade}` : ""}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
             <section className="border border-ink/10 bg-white/35 p-4"><h2 className="font-serif text-3xl font-semibold">Najblizszy wyjazd</h2><p className="mt-3 text-sm leading-6 text-muted">Checklisty beda trwale zapisywane i generowane z wybranych projektow. Reset wymaga potwierdzenia.</p><div className="mt-4 h-2 bg-soft-accent"><div className="h-2 w-[47%] bg-accent" /></div></section>
           </aside>
         </div>

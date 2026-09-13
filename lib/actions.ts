@@ -317,3 +317,49 @@ export async function deleteModel(id: string) {
   revalidatePath("/studio/modelki");
   redirect("/studio/modelki");
 }
+
+export async function addCosmetic(formData: FormData) {
+  const brand = String(formData.get("brand") || "").trim();
+  const name = String(formData.get("name") || "").trim();
+  const category = String(formData.get("category") || "").trim();
+  const shade = String(formData.get("shade") || "").trim();
+  const notes = String(formData.get("notes") || "").trim();
+
+  if (!name) throw new Error("Nazwa jest wymagana.");
+
+  const supabase = getSupabase();
+  const { error } = await supabase.from("cosmetics").insert({ brand, name, category, shade, notes });
+  if (error) throw new Error(`Nie udalo sie zapisac kosmetyku: ${error.message}`);
+
+  revalidatePath("/studio");
+  revalidatePath("/studio/kosmetyki");
+  redirect("/studio/kosmetyki");
+}
+
+export async function updateCosmetic(id: string, formData: FormData) {
+  const brand = String(formData.get("brand") || "").trim();
+  const name = String(formData.get("name") || "").trim();
+  const category = String(formData.get("category") || "").trim();
+  const shade = String(formData.get("shade") || "").trim();
+  const notes = String(formData.get("notes") || "").trim();
+
+  if (!name) throw new Error("Nazwa jest wymagana.");
+
+  const supabase = getSupabase();
+  const { error } = await supabase.from("cosmetics").update({ brand, name, category, shade, notes }).eq("id", id);
+  if (error) throw new Error(`Nie udalo sie zaktualizowac kosmetyku: ${error.message}`);
+
+  revalidatePath("/studio");
+  revalidatePath("/studio/kosmetyki");
+  redirect("/studio/kosmetyki");
+}
+
+export async function deleteCosmetic(id: string) {
+  const supabase = getSupabase();
+  const { error } = await supabase.from("cosmetics").delete().eq("id", id);
+  if (error) throw new Error(`Nie udalo sie usunac kosmetyku: ${error.message}`);
+
+  revalidatePath("/studio");
+  revalidatePath("/studio/kosmetyki");
+  redirect("/studio/kosmetyki");
+}

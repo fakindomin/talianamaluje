@@ -10,9 +10,4 @@ export const artist = {
   specialties: ["Editorial", "Bridal", "Soft glam", "Beauty shoot"]
 };
 
-export const studioStats = { privateProjects: 7, publishedProjects: 4, cosmetics: 38, models: 12, packingProgress: "8/17" };
-export const cosmetics = [
-  { name: "Skin Veil 03", brand: "Luma", type: "Podklad", usedIn: 3 },
-  { name: "Cream Blush Fig", brand: "Atelier", type: "Roz", usedIn: 5 },
-  { name: "Graphite Ink", brand: "Linework", type: "Eyeliner", usedIn: 2 }
-];
+export const studioStats = { privateProjects: 7, publishedProjects: 4, models: 12, packingProgress: "8/17" };
