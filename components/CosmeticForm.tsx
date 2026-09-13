@@ -27,30 +27,37 @@ export function CosmeticForm({
   const [name, setName] = useState(defaultValues?.name ?? "");
   const [brand, setBrand] = useState(defaultValues?.brand ?? "");
   const [category, setCategory] = useState(defaultValues?.category ?? "");
-  const [lookupStatus, setLookupStatus] = useState<"idle" | "loading" | "found" | "not-found" | "error">("idle");
+  const [lookupStatus, setLookupStatus] = useState<"idle" | "loading" | "found" | "found-empty" | "not-found" | "error">("idle");
 
-  const handleDetected = useCallback(
-    async (code: string) => {
-      setBarcode(code);
-      setLookupStatus("loading");
-      try {
-        const res = await fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`);
-        const data: { status: number; product?: OpenBeautyFactsProduct } = await res.json();
-        if (data.status === 1 && data.product) {
-          const product = data.product;
-          setBrand((current) => current || product.brands?.split(",")[0]?.trim() || current);
-          setName((current) => current || product.product_name?.trim() || current);
-          setCategory((current) => current || product.categories?.split(",")[0]?.trim() || current);
-          setLookupStatus("found");
-        } else {
-          setLookupStatus("not-found");
-        }
-      } catch {
-        setLookupStatus("error");
+  const handleDetected = useCallback(async (code: string) => {
+    setBarcode(code);
+    setLookupStatus("loading");
+    try {
+      const res = await fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`);
+      const data: { status: number; product?: OpenBeautyFactsProduct } = await res.json();
+      const product = data.status === 1 ? data.product : undefined;
+      if (!product) {
+        setLookupStatus("not-found");
+        return;
       }
-    },
-    []
-  );
+
+      const foundBrand = product.brands?.split(",")[0]?.trim();
+      const foundName = product.product_name?.trim();
+      const foundCategory = product.categories?.split(",")[0]?.trim();
+
+      if (!foundBrand && !foundName && !foundCategory) {
+        setLookupStatus("found-empty");
+        return;
+      }
+
+      if (foundBrand) setBrand((current) => current || foundBrand);
+      if (foundName) setName((current) => current || foundName);
+      if (foundCategory) setCategory((current) => current || foundCategory);
+      setLookupStatus("found");
+    } catch {
+      setLookupStatus("error");
+    }
+  }, []);
 
   return (
     <form action={action} className="mt-8 max-w-xl space-y-5">
@@ -68,6 +75,7 @@ export function CosmeticForm({
         </div>
         {lookupStatus === "loading" && <p className="mt-1 text-xs text-muted">Szukam produktu w bazie...</p>}
         {lookupStatus === "found" && <p className="mt-1 text-xs text-accent">Znaleziono produkt — uzupelniono puste pola.</p>}
+        {lookupStatus === "found-empty" && <p className="mt-1 text-xs text-muted">Kod jest w bazie, ale bez szczegolow produktu — uzupelnij recznie.</p>}
         {lookupStatus === "not-found" && <p className="mt-1 text-xs text-muted">Nie znaleziono tego kodu w bazie — uzupelnij recznie.</p>}
         {lookupStatus === "error" && <p className="mt-1 text-xs text-muted">Nie udalo sie sprawdzic bazy — uzupelnij recznie.</p>}
       </div>
