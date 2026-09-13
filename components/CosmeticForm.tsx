@@ -34,9 +34,9 @@ export function CosmeticForm({
   const lastLookedUp = useRef(defaultValues?.barcode ?? "");
 
   const applyMatch = useCallback((match: BarcodeMatch) => {
-    if (match.brand) setBrand((current) => current || match.brand);
-    if (match.name) setName((current) => current || match.name);
-    if (match.category) setCategory((current) => current || match.category);
+    if (match.brand) setBrand(match.brand);
+    if (match.name) setName(match.name);
+    if (match.category) setCategory(match.category);
     setLookupStatus("found");
   }, []);
 
@@ -100,7 +100,7 @@ export function CosmeticForm({
           <BarcodeScanButton onDetected={handleDetected} />
         </div>
         {lookupStatus === "loading" && <p className="mt-1 text-xs text-muted">Szukam produktu w bazie...</p>}
-        {lookupStatus === "found" && <p className="mt-1 text-xs text-accent">Znaleziono produkt — uzupelniono puste pola.</p>}
+        {lookupStatus === "found" && <p className="mt-1 text-xs text-accent">Znaleziono produkt — pola zostaly uzupelnione.</p>}
         {lookupStatus === "not-found" && <p className="mt-1 text-xs text-muted">Nie znaleziono tego kodu w zadnej z baz — uzupelnij recznie.</p>}
         {lookupStatus === "error" && <p className="mt-1 text-xs text-muted">Nie udalo sie sprawdzic bazy — uzupelnij recznie.</p>}
       </div>
