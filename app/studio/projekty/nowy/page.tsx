@@ -3,12 +3,12 @@ import { ArrowLeft } from "lucide-react";
 import { PhotoUploadField } from "@/components/PhotoUploadField";
 import { StudioSidebar } from "@/components/StudioSidebar";
 import { addProject } from "@/lib/actions";
-import { getModels } from "@/lib/db";
+import { getCosmetics, getModels } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function NowyProjektPage() {
-  const models = await getModels();
+  const [models, cosmetics] = await Promise.all([getModels(), getCosmetics()]);
 
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
@@ -33,9 +33,24 @@ export default async function NowyProjektPage() {
             Opis
             <textarea name="description" rows={3} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="Krotki opis realizacji" />
           </label>
+          <div className="block text-sm">
+            Uzyte kosmetyki
+            {cosmetics.length === 0 ? (
+              <p className="mt-2 text-sm text-muted">Katalog jest pusty — wpisz kosmetyki ponizej.</p>
+            ) : (
+              <div className="mt-2 max-h-48 space-y-1 overflow-y-auto border border-ink/15 bg-canvas p-3">
+                {cosmetics.map((cosmetic) => (
+                  <label key={cosmetic.id} className="flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="cosmeticIds" value={cosmetic.id} className="h-4 w-4" />
+                    {cosmetic.brand ? `${cosmetic.brand} ` : ""}{cosmetic.name}{cosmetic.category ? ` · ${cosmetic.category}` : ""}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
           <label className="block text-sm">
-            Uzyte kosmetyki (oddziel przecinkami)
-            <input name="products" className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. Skin veil, Cream blush" />
+            Nowe kosmetyki (jesli nie ma ich na liscie, oddziel przecinkami)
+            <input name="newCosmetics" className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. Skin Veil 03, Cream Blush Fig" />
           </label>
           <label className="block text-sm">
             Modelka

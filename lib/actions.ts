@@ -39,12 +39,28 @@ async function resolveModelId(formData: FormData, fallbackCoverUrl: string | nul
   return selectedModelId || null;
 }
 
+async function resolveCosmeticIds(formData: FormData): Promise<string[]> {
+  const selectedIds = formData.getAll("cosmeticIds").map((v) => String(v)).filter(Boolean);
+  const newNamesRaw = String(formData.get("newCosmetics") || "").trim();
+  const newNames = newNamesRaw ? newNamesRaw.split(",").map((n) => n.trim()).filter(Boolean) : [];
+
+  if (newNames.length === 0) return selectedIds;
+
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("cosmetics")
+    .insert(newNames.map((name) => ({ name })))
+    .select("id");
+  if (error) throw new Error(`Nie udalo sie utworzyc nowych kosmetykow: ${error.message}`);
+
+  return [...selectedIds, ...(data ?? []).map((row) => row.id)];
+}
+
 export async function addProject(formData: FormData) {
   const title = String(formData.get("title") || "").trim();
   const style = String(formData.get("style") || "").trim();
   const dateLabel = String(formData.get("dateLabel") || "").trim();
   const description = String(formData.get("description") || "").trim();
-  const productsRaw = String(formData.get("products") || "").trim();
   const isPublic = formData.get("isPublic") === "on";
   const textColor = String(formData.get("textColor") || "#F7EFEA").trim();
   const photoUrls = getPhotoUrls(formData, "photoUrls");
@@ -55,7 +71,7 @@ export async function addProject(formData: FormData) {
   }
 
   const modelId = await resolveModelId(formData, photoUrls[0]);
-  const products = productsRaw ? productsRaw.split(",").map((p) => p.trim()).filter(Boolean) : [];
+  const cosmeticIds = await resolveCosmeticIds(formData);
   const slug = slugify(title);
 
   const supabase = getSupabase();
@@ -69,7 +85,7 @@ export async function addProject(formData: FormData) {
     cover_alt: title,
     photo_urls: photoUrls,
     before_photo_urls: beforePhotoUrls,
-    products,
+    cosmetic_ids: cosmeticIds,
     is_public: isPublic,
     model_id: modelId,
     text_color: textColor
@@ -112,7 +128,6 @@ export async function updateProject(id: string, formData: FormData) {
   const style = String(formData.get("style") || "").trim();
   const dateLabel = String(formData.get("dateLabel") || "").trim();
   const description = String(formData.get("description") || "").trim();
-  const productsRaw = String(formData.get("products") || "").trim();
   const isPublic = formData.get("isPublic") === "on";
   const textColor = String(formData.get("textColor") || "#F7EFEA").trim();
   const newPhotoUrls = getPhotoUrls(formData, "photoUrls");
@@ -120,13 +135,13 @@ export async function updateProject(id: string, formData: FormData) {
 
   if (!title) throw new Error("Tytul jest wymagany.");
 
-  const products = productsRaw ? productsRaw.split(",").map((p) => p.trim()).filter(Boolean) : [];
+  const cosmeticIds = await resolveCosmeticIds(formData);
   const update: Record<string, unknown> = {
     title,
     style: style || "Bez kategorii",
     date_label: dateLabel,
     description,
-    products,
+    cosmetic_ids: cosmeticIds,
     is_public: isPublic,
     text_color: textColor
   };

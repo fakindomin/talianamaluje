@@ -71,10 +71,18 @@ export default async function WorkPage({
                 </div>
               </div>
             )}
-            <div className="mt-8">
-              <h2 className="text-sm font-medium">Uzyte kosmetyki</h2>
-              <ul className="mt-3 space-y-2 text-sm text-muted">{project.products.map((product) => <li key={product} className="border-b border-ink/10 pb-2">{product}</li>)}</ul>
-            </div>
+            {project.cosmetics.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-sm font-medium">Uzyte kosmetyki</h2>
+                <ul className="mt-3 space-y-2 text-sm text-muted">
+                  {project.cosmetics.map((cosmetic) => (
+                    <li key={cosmetic.id} className="border-b border-ink/10 pb-2">
+                      {cosmetic.brand ? `${cosmetic.brand} ` : ""}{cosmetic.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </aside>
         </section>
       </div>

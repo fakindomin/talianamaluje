@@ -38,7 +38,7 @@ export default async function EdytujKosmetykPage({ params }: { params: Promise<{
             </datalist>
           </label>
           <label className="block text-sm">
-            Odcien
+            Kolor
             <input name="shade" defaultValue={cosmetic.shade} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
           </label>
           <label className="block text-sm">

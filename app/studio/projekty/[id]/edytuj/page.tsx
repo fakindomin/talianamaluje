@@ -5,13 +5,13 @@ import { ArrowLeft, X } from "lucide-react";
 import { PhotoUploadField } from "@/components/PhotoUploadField";
 import { StudioSidebar } from "@/components/StudioSidebar";
 import { removeProjectBeforePhoto, removeProjectPhoto, updateProject } from "@/lib/actions";
-import { getModels, getProjectById } from "@/lib/db";
+import { getCosmetics, getModels, getProjectById } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function EdytujProjektPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [project, models] = await Promise.all([getProjectById(id), getModels()]);
+  const [project, models, cosmetics] = await Promise.all([getProjectById(id), getModels(), getCosmetics()]);
   if (!project) notFound();
 
   const updateWithId = updateProject.bind(null, id);
@@ -80,9 +80,30 @@ export default async function EdytujProjektPage({ params }: { params: Promise<{ 
             Opis
             <textarea name="description" rows={3} defaultValue={project.description} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
           </label>
+          <div className="block text-sm">
+            Uzyte kosmetyki
+            {cosmetics.length === 0 ? (
+              <p className="mt-2 text-sm text-muted">Katalog jest pusty — wpisz kosmetyki ponizej.</p>
+            ) : (
+              <div className="mt-2 max-h-48 space-y-1 overflow-y-auto border border-ink/15 bg-canvas p-3">
+                {cosmetics.map((cosmetic) => (
+                  <label key={cosmetic.id} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      name="cosmeticIds"
+                      value={cosmetic.id}
+                      defaultChecked={project.cosmeticIds.includes(cosmetic.id)}
+                      className="h-4 w-4"
+                    />
+                    {cosmetic.brand ? `${cosmetic.brand} ` : ""}{cosmetic.name}{cosmetic.category ? ` · ${cosmetic.category}` : ""}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
           <label className="block text-sm">
-            Uzyte kosmetyki (oddziel przecinkami)
-            <input name="products" defaultValue={project.products.join(", ")} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
+            Nowe kosmetyki (jesli nie ma ich na liscie, oddziel przecinkami)
+            <input name="newCosmetics" className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. Skin Veil 03, Cream Blush Fig" />
           </label>
           <label className="block text-sm">
             Modelka

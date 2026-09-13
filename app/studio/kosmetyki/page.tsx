@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { StudioSidebar } from "@/components/StudioSidebar";
-import { getCosmetics } from "@/lib/db";
+import { getCosmetics, getProjects } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function StudioKosmetykiPage() {
-  const cosmetics = await getCosmetics();
+  const [cosmetics, projects] = await Promise.all([getCosmetics(), getProjects()]);
+  const usageCounts = new Map<string, number>();
+  for (const project of projects) {
+    for (const cosmeticId of project.cosmeticIds) {
+      usageCounts.set(cosmeticId, (usageCounts.get(cosmeticId) ?? 0) + 1);
+    }
+  }
 
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
@@ -28,20 +34,25 @@ export default async function StudioKosmetykiPage() {
                   <th className="py-2 pr-4 font-medium">Marka</th>
                   <th className="py-2 pr-4 font-medium">Nazwa</th>
                   <th className="py-2 pr-4 font-medium">Kategoria</th>
-                  <th className="py-2 pr-4 font-medium">Odcien</th>
+                  <th className="py-2 pr-4 font-medium">Kolor</th>
+                  <th className="py-2 pr-4 font-medium">Uzyty</th>
                   <th className="py-2" />
                 </tr>
               </thead>
               <tbody>
-                {cosmetics.map((item) => (
-                  <tr key={item.id} className="border-b border-ink/10">
-                    <td className="py-3 pr-4 text-muted">{item.brand || "—"}</td>
-                    <td className="py-3 pr-4 font-medium">{item.name}</td>
-                    <td className="py-3 pr-4 text-muted">{item.category || "—"}</td>
-                    <td className="py-3 pr-4 text-muted">{item.shade || "—"}</td>
-                    <td className="py-3 text-right"><Link href={`/studio/kosmetyki/${item.id}/edytuj`} className="text-accent hover:underline">Edytuj</Link></td>
-                  </tr>
-                ))}
+                {cosmetics.map((item) => {
+                  const usedIn = usageCounts.get(item.id) ?? 0;
+                  return (
+                    <tr key={item.id} className="border-b border-ink/10">
+                      <td className="py-3 pr-4 text-muted">{item.brand || "—"}</td>
+                      <td className="py-3 pr-4 font-medium">{item.name}</td>
+                      <td className="py-3 pr-4 text-muted">{item.category || "—"}</td>
+                      <td className="py-3 pr-4 text-muted">{item.shade || "—"}</td>
+                      <td className="py-3 pr-4 text-muted">{usedIn === 0 ? "—" : `w ${usedIn} ${usedIn === 1 ? "projekcie" : "projektach"}`}</td>
+                      <td className="py-3 text-right"><Link href={`/studio/kosmetyki/${item.id}/edytuj`} className="text-accent hover:underline">Edytuj</Link></td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

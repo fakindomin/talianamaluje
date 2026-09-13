@@ -33,7 +33,7 @@ export default async function NowyKosmetykPage() {
             </datalist>
           </label>
           <label className="block text-sm">
-            Odcien
+            Kolor
             <input name="shade" className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. 03 Neutral" />
           </label>
           <label className="block text-sm">

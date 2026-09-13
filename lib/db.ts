@@ -22,7 +22,8 @@ export type Project = {
   coverAlt: string;
   photos: string[];
   beforePhotos: string[];
-  products: string[];
+  cosmeticIds: string[];
+  cosmetics: Cosmetic[];
   public: boolean;
   modelId: string | null;
   modelName: string | null;
@@ -37,7 +38,7 @@ export type Model = {
   photos: string[];
 };
 
-const PROJECT_SELECT = "id, slug, title, style, date_label, description, cover_url, cover_alt, photo_urls, before_photo_urls, products, is_public, model_id, text_color, models(name)";
+const PROJECT_SELECT = "id, slug, title, style, date_label, description, cover_url, cover_alt, photo_urls, before_photo_urls, cosmetic_ids, is_public, model_id, text_color, models(name)";
 
 type ProjectRow = {
   id: string;
@@ -50,14 +51,14 @@ type ProjectRow = {
   cover_alt: string;
   photo_urls: string[] | null;
   before_photo_urls: string[] | null;
-  products: string[] | null;
+  cosmetic_ids: string[] | null;
   is_public: boolean;
   model_id: string | null;
   text_color: string | null;
   models: { name: string } | { name: string }[] | null;
 };
 
-function mapProject(row: ProjectRow): Project {
+function mapProject(row: ProjectRow): Omit<Project, "cosmetics"> {
   const modelName = Array.isArray(row.models) ? row.models[0]?.name ?? null : row.models?.name ?? null;
   const photos = row.photo_urls && row.photo_urls.length > 0 ? row.photo_urls : [row.cover_url];
   return {
@@ -71,12 +72,26 @@ function mapProject(row: ProjectRow): Project {
     coverAlt: row.cover_alt,
     photos,
     beforePhotos: row.before_photo_urls ?? [],
-    products: row.products ?? [],
+    cosmeticIds: row.cosmetic_ids ?? [],
     public: row.is_public,
     modelId: row.model_id,
     modelName,
     textColor: row.text_color || "#F7EFEA"
   };
+}
+
+async function attachCosmetics(supabase: ReturnType<typeof getSupabase>, projects: Omit<Project, "cosmetics">[]): Promise<Project[]> {
+  const allIds = Array.from(new Set(projects.flatMap((p) => p.cosmeticIds)));
+  const cosmeticsById = new Map<string, Cosmetic>();
+  if (allIds.length > 0) {
+    const { data, error } = await supabase.from("cosmetics").select("id, brand, name, category, shade, notes").in("id", allIds);
+    if (error) throw new Error(`Nie udalo sie pobrac kosmetykow: ${error.message}`);
+    (data ?? []).forEach((c) => cosmeticsById.set(c.id, c));
+  }
+  return projects.map((p) => ({
+    ...p,
+    cosmetics: p.cosmeticIds.map((id) => cosmeticsById.get(id)).filter((c): c is Cosmetic => !!c)
+  }));
 }
 
 export async function getProjects(): Promise<Project[]> {
@@ -86,7 +101,8 @@ export async function getProjects(): Promise<Project[]> {
     .select(PROJECT_SELECT)
     .order("created_at", { ascending: false });
   if (error) throw new Error(`Nie udalo sie pobrac projektow: ${error.message}`);
-  return (data ?? []).map((row) => mapProject(row as unknown as ProjectRow));
+  const base = (data ?? []).map((row) => mapProject(row as unknown as ProjectRow));
+  return attachCosmetics(supabase, base);
 }
 
 export async function getProjectById(id: string): Promise<Project | null> {
@@ -98,7 +114,8 @@ export async function getProjectById(id: string): Promise<Project | null> {
     .maybeSingle();
   if (error) throw new Error(`Nie udalo sie pobrac projektu: ${error.message}`);
   if (!data) return null;
-  return mapProject(data as unknown as ProjectRow);
+  const [project] = await attachCosmetics(supabase, [mapProject(data as unknown as ProjectRow)]);
+  return project;
 }
 
 export async function getModelById(id: string): Promise<Model | null> {
