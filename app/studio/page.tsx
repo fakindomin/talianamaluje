@@ -2,12 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { StudioSidebar } from "@/components/StudioSidebar";
 import { studioStats } from "@/lib/data";
-import { getCosmetics, getProjects } from "@/lib/db";
+import { getCosmetics, getModels, getProjects } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function StudioPage() {
-  const [projects, cosmetics] = await Promise.all([getProjects(), getCosmetics()]);
+  const [projects, cosmetics, models] = await Promise.all([getProjects(), getCosmetics(), getModels()]);
   const publicCount = projects.filter((project) => project.public).length;
 
   return (
@@ -22,7 +22,7 @@ export default async function StudioPage() {
           <Link href="/studio/projekty/nowy" className="block w-full bg-accent px-4 py-3 text-center text-sm font-medium text-white md:w-auto">Nowy projekt</Link>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-5">
-          {[["Prywatne", projects.length - publicCount], ["Publiczne", publicCount], ["Kosmetyki", cosmetics.length], ["Modelki", studioStats.models], ["Spakowane", studioStats.packingProgress]].map(([label, value]) => <div key={label} className="border border-ink/10 bg-white/35 p-4"><p className="text-xs uppercase text-muted">{label}</p><p className="mt-2 font-serif text-3xl font-semibold">{value}</p></div>)}
+          {[["Prywatne", projects.length - publicCount], ["Publiczne", publicCount], ["Kosmetyki", cosmetics.length], ["Modelki", models.length], ["Spakowane", studioStats.packingProgress]].map(([label, value]) => <div key={label} className="border border-ink/10 bg-white/35 p-4"><p className="text-xs uppercase text-muted">{label}</p><p className="mt-2 font-serif text-3xl font-semibold">{value}</p></div>)}
         </div>
         <div className="mt-8 grid gap-8 xl:grid-cols-[1fr_360px]">
           <div>
