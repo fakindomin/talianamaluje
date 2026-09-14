@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { LockKeyhole } from "lucide-react";
 import { getProfile } from "@/lib/db";
 
 type CategoryTab = "portfolio" | "modelki" | "tematyczne";
@@ -22,7 +21,6 @@ export async function Header({ active }: { active?: CategoryTab } = {}) {
         </Link>
         <nav className="flex items-center gap-2 text-sm text-muted">
           <Link className="px-3 py-2 hover:text-ink" href={`/@${profile.slug}`}>Profil</Link>
-          <Link className="inline-flex items-center gap-2 rounded border border-ink/15 px-3 py-2 text-ink hover:bg-soft-accent" href="/login"><LockKeyhole aria-hidden size={16} />Studio</Link>
         </nav>
       </div>
       <nav className="mx-auto flex max-w-7xl gap-1 px-4 pb-3 sm:px-6 lg:px-8">
