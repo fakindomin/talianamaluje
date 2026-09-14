@@ -33,9 +33,6 @@ function pluralRealizacje(n: number): string {
 export default async function ArtistProfile() {
   const [profile, projects] = await Promise.all([getProfile(), getProjects()]);
   const publicProjects = projects.filter((project) => project.public);
-  const [featured, ...rest] = publicProjects;
-  const sideItems = rest.slice(0, 3);
-  const overflowItems = rest.slice(3);
   const { lead, rest: restBio } = splitBio(profile.bio);
   const from = `/@${profile.slug}`;
 
@@ -70,25 +67,11 @@ export default async function ArtistProfile() {
         {publicProjects.length === 0 ? (
           <p className="mt-4 text-sm text-muted">Portfolio pojawi sie tutaj, gdy dodam pierwsza publiczna realizacje.</p>
         ) : (
-          <>
-            <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-              <ProjectCard project={featured} priority from={from} aspect="aspect-[4/5]" />
-              {sideItems.length > 0 && (
-                <div className="flex flex-col gap-6">
-                  {sideItems.map((project) => (
-                    <ProjectCard key={project.id} project={project} from={from} aspect="aspect-[16/7]" />
-                  ))}
-                </div>
-              )}
-            </div>
-            {overflowItems.length > 0 && (
-              <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-3 xl:grid-cols-4">
-                {overflowItems.map((project) => (
-                  <ProjectCard key={project.id} project={project} from={from} />
-                ))}
-              </div>
-            )}
-          </>
+          <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-3 xl:grid-cols-4">
+            {publicProjects.map((project, index) => (
+              <ProjectCard key={project.id} project={project} priority={index < 2} from={from} />
+            ))}
+          </div>
         )}
       </section>
     </main>
