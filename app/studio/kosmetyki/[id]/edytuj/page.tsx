@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { CosmeticForm } from "@/components/CosmeticForm";
 import { StudioSidebar } from "@/components/StudioSidebar";
 import { updateCosmetic } from "@/lib/actions";
+import { mergeCategories } from "@/lib/cosmetics";
 import { getCosmeticById, getCosmetics } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +14,7 @@ export default async function EdytujKosmetykPage({ params }: { params: Promise<{
   const [cosmetic, cosmetics] = await Promise.all([getCosmeticById(id), getCosmetics()]);
   if (!cosmetic) notFound();
 
-  const categories = Array.from(new Set(cosmetics.map((item) => item.category).filter(Boolean)));
+  const categories = mergeCategories(cosmetics.map((item) => item.category).filter(Boolean));
   const updateWithId = updateCosmetic.bind(null, id);
 
   return (

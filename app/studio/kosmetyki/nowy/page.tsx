@@ -3,13 +3,14 @@ import { ArrowLeft } from "lucide-react";
 import { CosmeticForm } from "@/components/CosmeticForm";
 import { StudioSidebar } from "@/components/StudioSidebar";
 import { addCosmetic } from "@/lib/actions";
+import { mergeCategories } from "@/lib/cosmetics";
 import { getCosmetics } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function NowyKosmetykPage() {
   const cosmetics = await getCosmetics();
-  const categories = Array.from(new Set(cosmetics.map((item) => item.category).filter(Boolean)));
+  const categories = mergeCategories(cosmetics.map((item) => item.category).filter(Boolean));
 
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
