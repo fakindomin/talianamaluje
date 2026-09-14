@@ -2,12 +2,14 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { StudioSidebar } from "@/components/StudioSidebar";
 import { addCalendarEvent } from "@/lib/actions";
+import { getProjects } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function NoweWydarzeniePage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const { date } = await searchParams;
   const month = date?.slice(0, 7) ?? "";
+  const projects = await getProjects();
 
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
@@ -30,6 +32,15 @@ export default async function NoweWydarzeniePage({ searchParams }: { searchParam
               <input type="time" name="time" className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
             </label>
           </div>
+          <label className="block text-sm">
+            Projekt (jesli to sesja makijazu — wlaczy checkliste pakowania)
+            <select name="projectId" className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3">
+              <option value="">Brak</option>
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>{project.title}{project.modelName ? ` — ${project.modelName}` : ""}</option>
+              ))}
+            </select>
+          </label>
           <label className="block text-sm">
             Notatki
             <textarea name="notes" rows={3} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. adres, kontakt, szczegoly" />

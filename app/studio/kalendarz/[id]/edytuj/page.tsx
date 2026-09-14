@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { StudioSidebar } from "@/components/StudioSidebar";
 import { updateCalendarEvent } from "@/lib/actions";
-import { getCalendarEventById } from "@/lib/db";
+import { getCalendarEventById, getProjects } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,7 @@ export default async function EdytujWydarzeniePage({
 }) {
   const { id } = await params;
   const { month } = await searchParams;
-  const event = await getCalendarEventById(id);
+  const [event, projects] = await Promise.all([getCalendarEventById(id), getProjects()]);
   if (!event) notFound();
 
   const updateWithId = updateCalendarEvent.bind(null, id);
@@ -43,6 +43,18 @@ export default async function EdytujWydarzeniePage({
               <input type="time" name="time" defaultValue={event.time} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
             </label>
           </div>
+          <label className="block text-sm">
+            Projekt (jesli to sesja makijazu — wlaczy checkliste pakowania)
+            <select name="projectId" defaultValue={event.projectId ?? ""} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3">
+              <option value="">Brak</option>
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>{project.title}{project.modelName ? ` — ${project.modelName}` : ""}</option>
+              ))}
+            </select>
+          </label>
+          {event.projectId && (
+            <Link href={`/studio/na-wyjazd/${event.id}`} className="inline-block text-sm text-accent hover:underline">Idz do listy pakowania →</Link>
+          )}
           <label className="block text-sm">
             Notatki
             <textarea name="notes" rows={3} defaultValue={event.notes} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />

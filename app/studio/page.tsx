@@ -1,16 +1,23 @@
 import Link from "next/link";
 import { ProjectsView } from "@/components/ProjectsView";
 import { StudioSidebar } from "@/components/StudioSidebar";
-import { getCosmetics, getModels, getPackingItems, getProjects } from "@/lib/db";
+import { getAllPackingItems, getCosmetics, getModels, getProjects, getTripEvents } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function StudioPage() {
-  const [projects, cosmetics, models, packingItems] = await Promise.all([getProjects(), getCosmetics(), getModels(), getPackingItems()]);
+  const [projects, cosmetics, models, trips, packingItems] = await Promise.all([getProjects(), getCosmetics(), getModels(), getTripEvents(), getAllPackingItems()]);
   const publicCount = projects.filter((project) => project.public).length;
   const packingChecked = packingItems.filter((item) => item.checked).length;
   const packingTotal = packingItems.length;
-  const packingProgress = packingTotal > 0 ? Math.round((packingChecked / packingTotal) * 100) : 0;
+
+  const itemsByEvent = new Map<string, typeof packingItems>();
+  for (const item of packingItems) {
+    const list = itemsByEvent.get(item.eventId) ?? [];
+    list.push(item);
+    itemsByEvent.set(item.eventId, list);
+  }
+  const upcomingTrips = trips.slice(0, 3);
 
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
@@ -50,15 +57,27 @@ export default async function StudioPage() {
             <section className="border border-ink/10 bg-white/35 p-4">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="font-serif text-3xl font-semibold">Na wyjazd</h2>
-                <Link href="/studio/na-wyjazd" className="text-sm text-accent hover:underline">Zobacz liste</Link>
+                <Link href="/studio/na-wyjazd" className="text-sm text-accent hover:underline">Zobacz wszystkie</Link>
               </div>
-              {packingTotal === 0 ? (
-                <p className="mt-3 text-sm text-muted">Brak jeszcze zadnych pozycji na liscie pakowania.</p>
+              {upcomingTrips.length === 0 ? (
+                <p className="mt-4 text-sm text-muted">Brak zaplanowanych wyjazdow. Przypisz projekt do wydarzenia w Kalendarzu.</p>
               ) : (
-                <>
-                  <p className="mt-3 text-sm leading-6 text-muted">Spakowane {packingChecked} z {packingTotal} pozycji.</p>
-                  <div className="mt-4 h-2 bg-soft-accent"><div className="h-2 bg-accent" style={{ width: `${packingProgress}%` }} /></div>
-                </>
+                <div className="mt-4 space-y-3">
+                  {upcomingTrips.map((trip) => {
+                    const items = itemsByEvent.get(trip.id) ?? [];
+                    const checked = items.filter((item) => item.checked).length;
+                    const total = items.length;
+                    return (
+                      <Link key={trip.id} href={`/studio/na-wyjazd/${trip.id}`} className="block border-b border-ink/10 pb-3 last:border-b-0 last:pb-0">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="font-medium">{trip.title}</p>
+                          <span className="shrink-0 text-xs tabular-nums text-muted">{total > 0 ? `${checked}/${total}` : "pusta"}</span>
+                        </div>
+                        <p className="text-sm text-muted">{trip.date}{trip.time ? ` · ${trip.time}` : ""}</p>
+                      </Link>
+                    );
+                  })}
+                </div>
               )}
             </section>
           </aside>

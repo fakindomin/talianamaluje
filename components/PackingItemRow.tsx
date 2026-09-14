@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import { deletePackingItem, togglePackingItem } from "@/lib/actions";
 
-export function PackingItemRow({ id, label, checked }: { id: string; label: string; checked: boolean }) {
+export function PackingItemRow({ id, label, checked, eventId }: { id: string; label: string; checked: boolean; eventId: string }) {
   const [isPending, startTransition] = useTransition();
 
   return (
@@ -16,7 +16,7 @@ export function PackingItemRow({ id, label, checked }: { id: string; label: stri
           onChange={(e) => {
             const next = e.target.checked;
             startTransition(() => {
-              togglePackingItem(id, next);
+              togglePackingItem(id, next, eventId);
             });
           }}
           className="h-4 w-4 accent-accent"
@@ -26,7 +26,7 @@ export function PackingItemRow({ id, label, checked }: { id: string; label: stri
       <button
         type="button"
         disabled={isPending}
-        onClick={() => startTransition(() => { deletePackingItem(id); })}
+        onClick={() => startTransition(() => { deletePackingItem(id, eventId); })}
         className="text-xs text-muted hover:text-accent"
       >
         Usun

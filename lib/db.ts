@@ -207,44 +207,93 @@ export type CalendarEvent = {
   date: string;
   time: string;
   notes: string;
+  projectId: string | null;
+  projectTitle: string | null;
 };
+
+const CALENDAR_EVENT_SELECT = "id, title, event_date, event_time, notes, project_id, projects(title)";
+
+type CalendarEventRow = {
+  id: string;
+  title: string;
+  event_date: string;
+  event_time: string;
+  notes: string;
+  project_id: string | null;
+  projects: { title: string } | { title: string }[] | null;
+};
+
+function mapCalendarEvent(row: CalendarEventRow): CalendarEvent {
+  const projectTitle = Array.isArray(row.projects) ? row.projects[0]?.title ?? null : row.projects?.title ?? null;
+  return {
+    id: row.id,
+    title: row.title,
+    date: row.event_date,
+    time: row.event_time,
+    notes: row.notes,
+    projectId: row.project_id,
+    projectTitle
+  };
+}
 
 export async function getCalendarEvents(): Promise<CalendarEvent[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("calendar_events")
-    .select("id, title, event_date, event_time, notes")
+    .select(CALENDAR_EVENT_SELECT)
     .order("event_date", { ascending: true });
   if (error) throw new Error(`Nie udalo sie pobrac wydarzen: ${error.message}`);
-  return (data ?? []).map((row) => ({ id: row.id, title: row.title, date: row.event_date, time: row.event_time, notes: row.notes }));
+  return (data ?? []).map((row) => mapCalendarEvent(row as unknown as CalendarEventRow));
 }
 
 export async function getCalendarEventById(id: string): Promise<CalendarEvent | null> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("calendar_events")
-    .select("id, title, event_date, event_time, notes")
+    .select(CALENDAR_EVENT_SELECT)
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`Nie udalo sie pobrac wydarzenia: ${error.message}`);
   if (!data) return null;
-  return { id: data.id, title: data.title, date: data.event_date, time: data.event_time, notes: data.notes };
+  return mapCalendarEvent(data as unknown as CalendarEventRow);
+}
+
+export async function getTripEvents(): Promise<CalendarEvent[]> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("calendar_events")
+    .select(CALENDAR_EVENT_SELECT)
+    .not("project_id", "is", null)
+    .order("event_date", { ascending: true });
+  if (error) throw new Error(`Nie udalo sie pobrac wyjazdow: ${error.message}`);
+  return (data ?? []).map((row) => mapCalendarEvent(row as unknown as CalendarEventRow));
 }
 
 export type PackingItem = {
   id: string;
   label: string;
   checked: boolean;
+  eventId: string;
 };
 
-export async function getPackingItems(): Promise<PackingItem[]> {
+export async function getPackingItems(eventId: string): Promise<PackingItem[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("packing_items")
-    .select("id, label, checked")
+    .select("id, label, checked, event_id")
+    .eq("event_id", eventId)
     .order("created_at", { ascending: true });
   if (error) throw new Error(`Nie udalo sie pobrac listy pakowania: ${error.message}`);
-  return data ?? [];
+  return (data ?? []).map((row) => ({ id: row.id, label: row.label, checked: row.checked, eventId: row.event_id }));
+}
+
+export async function getAllPackingItems(): Promise<PackingItem[]> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("packing_items")
+    .select("id, label, checked, event_id");
+  if (error) throw new Error(`Nie udalo sie pobrac list pakowania: ${error.message}`);
+  return (data ?? []).map((row) => ({ id: row.id, label: row.label, checked: row.checked, eventId: row.event_id }));
 }
 
 export async function getModels(): Promise<Model[]> {

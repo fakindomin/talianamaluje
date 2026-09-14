@@ -528,14 +528,17 @@ export async function addCalendarEvent(formData: FormData) {
   const date = String(formData.get("date") || "").trim();
   const time = String(formData.get("time") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
+  const projectId = String(formData.get("projectId") || "").trim() || null;
 
   if (!title || !date) throw new Error("Tytul i data sa wymagane.");
 
   const supabase = getSupabase();
-  const { error } = await supabase.from("calendar_events").insert({ title, event_date: date, event_time: time, notes });
+  const { error } = await supabase.from("calendar_events").insert({ title, event_date: date, event_time: time, notes, project_id: projectId });
   if (error) throw new Error(`Nie udalo sie zapisac wydarzenia: ${error.message}`);
 
   revalidatePath("/studio/kalendarz");
+  revalidatePath("/studio/na-wyjazd");
+  revalidatePath("/studio");
   redirect(`/studio/kalendarz?month=${date.slice(0, 7)}`);
 }
 
@@ -544,14 +547,17 @@ export async function updateCalendarEvent(id: string, formData: FormData) {
   const date = String(formData.get("date") || "").trim();
   const time = String(formData.get("time") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
+  const projectId = String(formData.get("projectId") || "").trim() || null;
 
   if (!title || !date) throw new Error("Tytul i data sa wymagane.");
 
   const supabase = getSupabase();
-  const { error } = await supabase.from("calendar_events").update({ title, event_date: date, event_time: time, notes }).eq("id", id);
+  const { error } = await supabase.from("calendar_events").update({ title, event_date: date, event_time: time, notes, project_id: projectId }).eq("id", id);
   if (error) throw new Error(`Nie udalo sie zaktualizowac wydarzenia: ${error.message}`);
 
   revalidatePath("/studio/kalendarz");
+  revalidatePath("/studio/na-wyjazd");
+  revalidatePath("/studio");
   redirect(`/studio/kalendarz?month=${date.slice(0, 7)}`);
 }
 
@@ -561,45 +567,84 @@ export async function deleteCalendarEvent(id: string, month: string) {
   if (error) throw new Error(`Nie udalo sie usunac wydarzenia: ${error.message}`);
 
   revalidatePath("/studio/kalendarz");
+  revalidatePath("/studio/na-wyjazd");
+  revalidatePath("/studio");
   redirect(`/studio/kalendarz?month=${month}`);
 }
 
-export async function addPackingItem(formData: FormData) {
+export async function addPackingItem(eventId: string, formData: FormData) {
   const label = String(formData.get("label") || "").trim();
   if (!label) throw new Error("Nazwa pozycji jest wymagana.");
 
   const supabase = getSupabase();
-  const { error } = await supabase.from("packing_items").insert({ label, checked: false });
+  const { error } = await supabase.from("packing_items").insert({ label, checked: false, event_id: eventId });
   if (error) throw new Error(`Nie udalo sie dodac pozycji: ${error.message}`);
 
+  revalidatePath(`/studio/na-wyjazd/${eventId}`);
   revalidatePath("/studio/na-wyjazd");
   revalidatePath("/studio");
 }
 
-export async function togglePackingItem(id: string, checked: boolean) {
+export async function togglePackingItem(id: string, checked: boolean, eventId: string) {
   const supabase = getSupabase();
   const { error } = await supabase.from("packing_items").update({ checked }).eq("id", id);
   if (error) throw new Error(`Nie udalo sie zaktualizowac pozycji: ${error.message}`);
 
+  revalidatePath(`/studio/na-wyjazd/${eventId}`);
   revalidatePath("/studio/na-wyjazd");
   revalidatePath("/studio");
 }
 
-export async function deletePackingItem(id: string) {
+export async function deletePackingItem(id: string, eventId: string) {
   const supabase = getSupabase();
   const { error } = await supabase.from("packing_items").delete().eq("id", id);
   if (error) throw new Error(`Nie udalo sie usunac pozycji: ${error.message}`);
 
+  revalidatePath(`/studio/na-wyjazd/${eventId}`);
   revalidatePath("/studio/na-wyjazd");
   revalidatePath("/studio");
 }
 
-export async function resetPackingList() {
+export async function resetPackingList(eventId: string) {
   const supabase = getSupabase();
-  const { error } = await supabase.from("packing_items").update({ checked: false }).neq("id", "00000000-0000-0000-0000-000000000000");
+  const { error } = await supabase.from("packing_items").update({ checked: false }).eq("event_id", eventId);
   if (error) throw new Error(`Nie udalo sie zresetowac listy: ${error.message}`);
 
+  revalidatePath(`/studio/na-wyjazd/${eventId}`);
   revalidatePath("/studio/na-wyjazd");
   revalidatePath("/studio");
-  redirect("/studio/na-wyjazd");
+  redirect(`/studio/na-wyjazd/${eventId}`);
+}
+
+export async function addCosmeticsFromProject(eventId: string, projectId: string) {
+  const supabase = getSupabase();
+
+  const { data: project, error: projectError } = await supabase.from("projects").select("cosmetic_ids").eq("id", projectId).maybeSingle();
+  if (projectError) throw new Error(`Nie udalo sie pobrac projektu: ${projectError.message}`);
+  const cosmeticIds: string[] = project?.cosmetic_ids ?? [];
+  if (cosmeticIds.length === 0) {
+    revalidatePath(`/studio/na-wyjazd/${eventId}`);
+    return;
+  }
+
+  const { data: cosmetics, error: cosmeticsError } = await supabase.from("cosmetics").select("brand, name").in("id", cosmeticIds);
+  if (cosmeticsError) throw new Error(`Nie udalo sie pobrac kosmetykow: ${cosmeticsError.message}`);
+
+  const { data: existingItems, error: existingError } = await supabase.from("packing_items").select("label").eq("event_id", eventId);
+  if (existingError) throw new Error(`Nie udalo sie pobrac listy pakowania: ${existingError.message}`);
+  const existingLabels = new Set((existingItems ?? []).map((item) => item.label));
+
+  const newItems = (cosmetics ?? [])
+    .map((c) => ({ label: `${c.brand ? `${c.brand} ` : ""}${c.name}`.trim() }))
+    .filter((item) => item.label && !existingLabels.has(item.label))
+    .map((item) => ({ label: item.label, checked: false, event_id: eventId }));
+
+  if (newItems.length > 0) {
+    const { error: insertError } = await supabase.from("packing_items").insert(newItems);
+    if (insertError) throw new Error(`Nie udalo sie dodac kosmetykow: ${insertError.message}`);
+  }
+
+  revalidatePath(`/studio/na-wyjazd/${eventId}`);
+  revalidatePath("/studio/na-wyjazd");
+  revalidatePath("/studio");
 }
