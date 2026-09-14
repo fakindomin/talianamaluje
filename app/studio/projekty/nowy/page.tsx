@@ -71,7 +71,7 @@ export default async function NowyProjektPage() {
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="isPublic" defaultChecked className="h-4 w-4" />
-            Widoczny publicznie (Portfolio, Makijaze tematyczne)
+            Widoczny publicznie (Portfolio)
           </label>
           <button type="submit" className="w-full bg-accent px-4 py-3 text-sm font-medium text-white sm:w-auto">Zapisz projekt</button>
         </form>

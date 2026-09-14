@@ -14,7 +14,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/`, changeFrequency: "weekly", priority: 1 },
     { url: `${siteUrl}/@${artist.slug}`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${siteUrl}/modelki`, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${siteUrl}/tematyczne`, changeFrequency: "monthly", priority: 0.5 },
     ...publicProjects.map((project) => ({
       url: `${siteUrl}/work/${project.slug}`,
       changeFrequency: "monthly" as const,

@@ -141,6 +141,7 @@ export type Profile = {
   bio: string;
   avatar: string;
   avatarAlt: string;
+  photos: string[];
   specialties: string[];
   accentColor: string;
   canvasColor: string;
@@ -150,11 +151,11 @@ export async function getProfile(): Promise<Profile> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("profile")
-    .select("display_name, brand_name, slug, city, service_area, bio, avatar_url, avatar_alt, specialties, accent_color, canvas_color")
+    .select("display_name, brand_name, slug, city, service_area, bio, avatar_url, avatar_alt, photo_urls, specialties, accent_color, canvas_color")
     .eq("id", "default")
     .maybeSingle();
   if (error) throw new Error(`Nie udalo sie pobrac profilu: ${error.message}`);
-  if (!data) return { ...artist, accentColor: DEFAULT_ACCENT_COLOR, canvasColor: DEFAULT_CANVAS_COLOR };
+  if (!data) return { ...artist, photos: [artist.avatar], accentColor: DEFAULT_ACCENT_COLOR, canvasColor: DEFAULT_CANVAS_COLOR };
   return {
     displayName: data.display_name,
     brandName: data.brand_name,
@@ -164,6 +165,7 @@ export async function getProfile(): Promise<Profile> {
     bio: data.bio,
     avatar: data.avatar_url,
     avatarAlt: data.avatar_alt,
+    photos: data.photo_urls && data.photo_urls.length > 0 ? data.photo_urls : [data.avatar_url],
     specialties: data.specialties ?? [],
     accentColor: data.accent_color || DEFAULT_ACCENT_COLOR,
     canvasColor: data.canvas_color || DEFAULT_CANVAS_COLOR

@@ -1,8 +1,7 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import { Header } from "@/components/Header";
-import { ProjectCard } from "@/components/ProjectCard";
-import { getProfile, getProjects } from "@/lib/db";
+import { getProfile } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -22,25 +21,15 @@ function splitBio(bio: string): { lead: string; rest: string } {
   return { lead: match[1], rest: match[2] };
 }
 
-function pluralRealizacje(n: number): string {
-  if (n === 1) return "1 realizacja";
-  const lastDigit = n % 10;
-  const lastTwo = n % 100;
-  if (lastDigit >= 2 && lastDigit <= 4 && !(lastTwo >= 12 && lastTwo <= 14)) return `${n} realizacje`;
-  return `${n} realizacji`;
-}
-
 export default async function ArtistProfile() {
-  const [profile, projects] = await Promise.all([getProfile(), getProjects()]);
-  const publicProjects = projects.filter((project) => project.public);
+  const profile = await getProfile();
   const { lead, rest: restBio } = splitBio(profile.bio);
-  const from = `/@${profile.slug}`;
 
   return (
     <main>
       <Header />
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <header className="grid gap-8 border-b border-ink/10 pb-9 md:grid-cols-[340px_1fr] md:items-end md:gap-12">
+        <div className="grid gap-8 md:grid-cols-[340px_1fr] md:items-end md:gap-12">
           <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-soft-accent shadow-line">
             <Image src={profile.avatar} alt={profile.avatarAlt} fill priority sizes="(max-width: 768px) 60vw, 340px" className="object-cover" />
           </div>
@@ -57,22 +46,7 @@ export default async function ArtistProfile() {
               </ul>
             )}
           </div>
-        </header>
-
-        <div className="mt-10 flex items-baseline justify-between gap-3">
-          <h2 className="font-serif text-3xl font-semibold">Portfolio</h2>
-          {publicProjects.length > 0 && <span className="text-xs uppercase tracking-[0.08em] text-muted">{pluralRealizacje(publicProjects.length)}</span>}
         </div>
-
-        {publicProjects.length === 0 ? (
-          <p className="mt-4 text-sm text-muted">Portfolio pojawi sie tutaj, gdy dodam pierwsza publiczna realizacje.</p>
-        ) : (
-          <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-3 xl:grid-cols-4">
-            {publicProjects.map((project, index) => (
-              <ProjectCard key={project.id} project={project} priority={index < 2} from={from} />
-            ))}
-          </div>
-        )}
       </section>
     </main>
   );

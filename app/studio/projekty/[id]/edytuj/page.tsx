@@ -124,7 +124,7 @@ export default async function EdytujProjektPage({ params }: { params: Promise<{ 
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="isPublic" defaultChecked={project.public} className="h-4 w-4" />
-            Widoczny publicznie (Portfolio, Makijaze tematyczne)
+            Widoczny publicznie (Portfolio)
           </label>
           <div className="flex flex-wrap gap-3">
             <button type="submit" className="bg-accent px-4 py-3 text-sm font-medium text-white">Zapisz zmiany</button>

@@ -1,5 +1,4 @@
-import Image from "next/image";
-import { PhotoUploadField } from "@/components/PhotoUploadField";
+import Link from "next/link";
 import { StudioSidebar } from "@/components/StudioSidebar";
 import { updateProfile } from "@/lib/actions";
 import { getProfile } from "@/lib/db";
@@ -15,11 +14,10 @@ export default async function StudioProfilPage() {
       <section className="px-4 py-6 sm:px-6 lg:px-8">
         <p className="text-xs uppercase text-accent">Publiczny profil</p>
         <h1 className="mt-2 font-serif text-5xl font-semibold leading-none">Profil</h1>
-        <div className="mt-6 max-w-xl">
-          <div className="relative aspect-[4/5] w-48 overflow-hidden rounded-md bg-soft-accent shadow-line">
-            <Image src={profile.avatar} alt={profile.avatarAlt} fill sizes="192px" className="object-cover" />
-          </div>
-        </div>
+        <p className="mt-3 max-w-xl text-sm text-muted">
+          Zdjeciami profilowymi zarzadzasz w{" "}
+          <Link href="/studio/ustawienia" className="text-accent hover:underline">Ustawieniach</Link>.
+        </p>
         <form action={updateProfile} className="mt-6 max-w-xl space-y-5">
           <label className="block text-sm">
             Imie i nazwisko*
@@ -49,7 +47,6 @@ export default async function StudioProfilPage() {
             Specjalizacje (oddziel przecinkami)
             <input name="specialties" defaultValue={profile.specialties.join(", ")} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
           </label>
-          <PhotoUploadField name="avatarUrl" folder="profile" label="Nowe zdjecie profilowe (zostaw puste, zeby zachowac obecne)" />
           <button type="submit" className="bg-accent px-4 py-3 text-sm font-medium text-white">Zapisz zmiany</button>
         </form>
       </section>

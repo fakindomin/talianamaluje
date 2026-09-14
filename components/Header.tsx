@@ -2,12 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { getProfile } from "@/lib/db";
 
-type CategoryTab = "portfolio" | "modelki" | "tematyczne";
+type CategoryTab = "portfolio" | "modelki";
 
 const categoryTabs: { key: CategoryTab; label: string; href: string }[] = [
   { key: "portfolio", label: "Portfolio", href: "/" },
-  { key: "modelki", label: "Modelki", href: "/modelki" },
-  { key: "tematyczne", label: "Makijaze tematyczne", href: "/tematyczne" }
+  { key: "modelki", label: "Modelki/Klientki", href: "/modelki" }
 ];
 
 export async function Header({ active }: { active?: CategoryTab } = {}) {

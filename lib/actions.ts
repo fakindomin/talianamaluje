@@ -94,7 +94,6 @@ export async function addProject(formData: FormData) {
   if (error) throw new Error(`Nie udalo sie zapisac projektu: ${error.message}`);
 
   revalidatePath("/");
-  revalidatePath("/tematyczne");
   revalidatePath("/modelki");
   revalidatePath("/@nina-kaminska");
   revalidatePath("/studio");
@@ -168,7 +167,6 @@ export async function updateProject(id: string, formData: FormData) {
   if (error) throw new Error(`Nie udalo sie zaktualizowac projektu: ${error.message}`);
 
   revalidatePath("/");
-  revalidatePath("/tematyczne");
   revalidatePath("/modelki");
   revalidatePath("/@nina-kaminska");
   revalidatePath("/studio");
@@ -188,7 +186,6 @@ export async function removeProjectPhoto(id: string, photoUrl: string) {
   if (error) throw new Error(`Nie udalo sie usunac zdjecia: ${error.message}`);
 
   revalidatePath("/");
-  revalidatePath("/tematyczne");
   revalidatePath("/modelki");
   revalidatePath("/studio");
   revalidatePath(`/studio/projekty/${id}/edytuj`);
@@ -215,7 +212,6 @@ export async function deleteProject(id: string) {
   if (error) throw new Error(`Nie udalo sie usunac projektu: ${error.message}`);
 
   revalidatePath("/");
-  revalidatePath("/tematyczne");
   revalidatePath("/@nina-kaminska");
   revalidatePath("/studio");
   redirect("/studio");
@@ -291,7 +287,6 @@ export async function updateProfile(formData: FormData) {
   const city = String(formData.get("city") || "").trim();
   const serviceArea = String(formData.get("serviceArea") || "").trim();
   const bio = String(formData.get("bio") || "").trim();
-  const avatarUrl = String(formData.get("avatarUrl") || "").trim();
   const specialtiesRaw = String(formData.get("specialties") || "").trim();
 
   if (!displayName || !slug) throw new Error("Imie i nazwisko oraz nick sa wymagane.");
@@ -307,21 +302,74 @@ export async function updateProfile(formData: FormData) {
     bio,
     specialties
   };
-  if (avatarUrl) {
-    update.avatar_url = avatarUrl;
-    update.avatar_alt = `Portret ${displayName}`;
-  }
 
   const supabase = getSupabase();
   const { error } = await supabase.from("profile").update(update).eq("id", "default");
   if (error) throw new Error(`Nie udalo sie zapisac profilu: ${error.message}`);
 
   revalidatePath("/");
-  revalidatePath("/tematyczne");
   revalidatePath("/modelki");
   revalidatePath("/studio");
   revalidatePath("/studio/profil");
   redirect("/studio/profil");
+}
+
+export async function addProfilePhotos(formData: FormData) {
+  const newPhotoUrls = getPhotoUrls(formData, "photoUrls");
+  if (newPhotoUrls.length === 0) {
+    revalidatePath("/studio/ustawienia");
+    return;
+  }
+
+  const supabase = getSupabase();
+  const { data: existing, error: fetchError } = await supabase.from("profile").select("photo_urls, avatar_url").eq("id", "default").maybeSingle();
+  if (fetchError) throw new Error(`Nie udalo sie pobrac profilu: ${fetchError.message}`);
+
+  const combined = [...(existing?.photo_urls ?? []), ...newPhotoUrls];
+  const update: Record<string, unknown> = { photo_urls: combined };
+  if (!existing?.avatar_url) update.avatar_url = combined[0];
+
+  const { error } = await supabase.from("profile").update(update).eq("id", "default");
+  if (error) throw new Error(`Nie udalo sie dodac zdjec: ${error.message}`);
+
+  revalidatePath("/");
+  revalidatePath("/studio");
+  revalidatePath("/studio/ustawienia");
+}
+
+export async function setProfileCover(photoUrl: string) {
+  const supabase = getSupabase();
+  const { data: existing, error: fetchError } = await supabase.from("profile").select("display_name").eq("id", "default").maybeSingle();
+  if (fetchError) throw new Error(`Nie udalo sie pobrac profilu: ${fetchError.message}`);
+
+  const { error } = await supabase
+    .from("profile")
+    .update({ avatar_url: photoUrl, avatar_alt: `Portret ${existing?.display_name ?? ""}` })
+    .eq("id", "default");
+  if (error) throw new Error(`Nie udalo sie ustawic zdjecia glownego: ${error.message}`);
+
+  revalidatePath("/");
+  revalidatePath("/studio");
+  revalidatePath("/studio/ustawienia");
+}
+
+export async function removeProfilePhoto(photoUrl: string) {
+  const supabase = getSupabase();
+  const { data: existing, error: fetchError } = await supabase.from("profile").select("photo_urls, avatar_url").eq("id", "default").maybeSingle();
+  if (fetchError) throw new Error(`Nie udalo sie pobrac profilu: ${fetchError.message}`);
+
+  const remaining = (existing?.photo_urls ?? []).filter((url: string) => url !== photoUrl);
+  if (remaining.length === 0) throw new Error("Profil musi miec przynajmniej jedno zdjecie.");
+
+  const update: Record<string, unknown> = { photo_urls: remaining };
+  if (existing?.avatar_url === photoUrl) update.avatar_url = remaining[0];
+
+  const { error } = await supabase.from("profile").update(update).eq("id", "default");
+  if (error) throw new Error(`Nie udalo sie usunac zdjecia: ${error.message}`);
+
+  revalidatePath("/");
+  revalidatePath("/studio");
+  revalidatePath("/studio/ustawienia");
 }
 
 export async function updateSettings(formData: FormData) {
@@ -334,7 +382,6 @@ export async function updateSettings(formData: FormData) {
   if (error) throw new Error(`Nie udalo sie zapisac ustawien: ${error.message}`);
 
   revalidatePath("/");
-  revalidatePath("/tematyczne");
   revalidatePath("/modelki");
   revalidatePath("/@nina-kaminska");
   revalidatePath("/studio");
@@ -348,7 +395,6 @@ export async function resetSettings() {
   if (error) throw new Error(`Nie udalo sie zresetowac ustawien: ${error.message}`);
 
   revalidatePath("/");
-  revalidatePath("/tematyczne");
   revalidatePath("/modelki");
   revalidatePath("/@nina-kaminska");
   revalidatePath("/studio");

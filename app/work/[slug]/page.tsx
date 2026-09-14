@@ -13,7 +13,6 @@ function resolveBackTarget(back: string | undefined, profileSlug: string): { hre
   const path = isSafe ? back! : `/@${profileSlug}`;
 
   if (path === "/") return { href: path, label: "Wroc do Portfolio" };
-  if (path === "/tematyczne") return { href: path, label: "Wroc do makijazy tematycznych" };
   if (path.startsWith("/modelki/")) return { href: path, label: "Wroc do modelki" };
   if (path.startsWith("/@")) return { href: path, label: "Wroc do profilu" };
   return { href: `/@${profileSlug}`, label: "Wroc do profilu" };
