@@ -18,7 +18,7 @@ export default async function Home() {
           </div>
           <p className="max-w-xl text-base leading-7 text-muted">Publiczna czesc zaczyna sie od realizacji. Bez logowania, bez social metryk, bez katalogu fikcyjnych artystow.</p>
         </div>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 xl:grid-cols-4">
           {publicProjects.map((project, index) => <ProjectCard key={project.id} project={project} priority={index < 2} from="/" />)}
         </div>
       </section>

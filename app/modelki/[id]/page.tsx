@@ -40,7 +40,7 @@ export default async function ModelkaPage({ params }: { params: Promise<{ id: st
         {modelProjects.length === 0 ? (
           <p className="mt-8 text-sm text-muted">Brak jeszcze publicznych makijazy z ta modelka.</p>
         ) : (
-          <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-3 xl:grid-cols-4">
             {modelProjects.map((project) => <ProjectCard key={project.id} project={project} from={`/modelki/${model.id}`} />)}
           </div>
         )}

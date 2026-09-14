@@ -20,7 +20,7 @@ export default async function TematycznePage() {
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <p className="mb-2 text-xs uppercase text-accent">Kategorie</p>
         <h1 className="mb-8 font-serif text-5xl font-semibold leading-none">Makijaze tematyczne</h1>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 xl:grid-cols-4">
           {publicProjects.map((project, index) => <ProjectCard key={project.id} project={project} priority={index < 2} from="/tematyczne" />)}
         </div>
       </section>

@@ -71,10 +71,10 @@ export default async function ArtistProfile() {
           <p className="mt-4 text-sm text-muted">Portfolio pojawi sie tutaj, gdy dodam pierwsza publiczna realizacje.</p>
         ) : (
           <>
-            <div className="mt-6 grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+            <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
               <ProjectCard project={featured} priority from={from} aspect="aspect-[4/5]" />
               {sideItems.length > 0 && (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-6">
                   {sideItems.map((project) => (
                     <ProjectCard key={project.id} project={project} from={from} aspect="aspect-[16/7]" />
                   ))}
@@ -82,7 +82,7 @@ export default async function ArtistProfile() {
               )}
             </div>
             {overflowItems.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+              <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-3 xl:grid-cols-4">
                 {overflowItems.map((project) => (
                   <ProjectCard key={project.id} project={project} from={from} />
                 ))}
