@@ -68,7 +68,7 @@ export default async function KalendarzPage({ searchParams }: { searchParams: Pr
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-7 gap-px overflow-hidden rounded-md border border-ink/10 bg-ink/10 text-sm">
+        <div className="mt-6 grid grid-cols-7 divide-x divide-y divide-ink/15 overflow-hidden rounded-md border border-ink/15 text-sm">
           {WEEKDAY_LABELS.map((label) => (
             <div key={label} className="bg-white/60 p-2 text-center text-xs uppercase text-muted">{label}</div>
           ))}
