@@ -58,8 +58,8 @@ async function resolveCosmeticIds(formData: FormData): Promise<string[]> {
 }
 
 export async function addProject(formData: FormData) {
-  const title = String(formData.get("title") || "").trim();
   const style = String(formData.get("style") || "").trim();
+  const title = String(formData.get("title") || "").trim() || style || "Makijaz";
   const dateLabel = String(formData.get("dateLabel") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const isPublic = formData.get("isPublic") === "on";
@@ -67,8 +67,8 @@ export async function addProject(formData: FormData) {
   const photoUrls = getPhotoUrls(formData, "photoUrls");
   const beforePhotoUrls = getPhotoUrls(formData, "beforePhotoUrls");
 
-  if (!title || photoUrls.length === 0) {
-    throw new Error("Tytul i przynajmniej jedno zdjecie sa wymagane.");
+  if (photoUrls.length === 0) {
+    throw new Error("Przynajmniej jedno zdjecie jest wymagane.");
   }
 
   const modelId = await resolveModelId(formData, photoUrls[0]);
@@ -124,16 +124,14 @@ export async function addModel(formData: FormData) {
 }
 
 export async function updateProject(id: string, formData: FormData) {
-  const title = String(formData.get("title") || "").trim();
   const style = String(formData.get("style") || "").trim();
+  const title = String(formData.get("title") || "").trim() || style || "Makijaz";
   const dateLabel = String(formData.get("dateLabel") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const isPublic = formData.get("isPublic") === "on";
   const textColor = String(formData.get("textColor") || "#F7EFEA").trim();
   const newPhotoUrls = getPhotoUrls(formData, "photoUrls");
   const newBeforePhotoUrls = getPhotoUrls(formData, "beforePhotoUrls");
-
-  if (!title) throw new Error("Tytul jest wymagany.");
 
   const cosmeticIds = await resolveCosmeticIds(formData);
   const update: Record<string, unknown> = {

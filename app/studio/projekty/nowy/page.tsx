@@ -18,8 +18,8 @@ export default async function NowyProjektPage() {
         <h1 className="mt-4 font-serif text-5xl font-semibold leading-none">Nowy projekt</h1>
         <form action={addProject} className="mt-8 max-w-xl space-y-5">
           <label className="block text-sm">
-            Tytul (podpis kafelka)*
-            <input name="title" required className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. Artystyczny" />
+            Tytul (podpis kafelka)
+            <input name="title" className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. Artystyczny" />
           </label>
           <label className="block text-sm">
             Rodzaj makijazu
