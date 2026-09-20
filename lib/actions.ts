@@ -288,6 +288,8 @@ export async function updateProfile(formData: FormData) {
   const serviceArea = String(formData.get("serviceArea") || "").trim();
   const bio = String(formData.get("bio") || "").trim();
   const specialtiesRaw = String(formData.get("specialties") || "").trim();
+  const facebookUrl = String(formData.get("facebookUrl") || "").trim();
+  const instagramUrl = String(formData.get("instagramUrl") || "").trim();
 
   if (!displayName || !slug) throw new Error("Imie i nazwisko oraz nick sa wymagane.");
 
@@ -300,7 +302,9 @@ export async function updateProfile(formData: FormData) {
     city,
     service_area: serviceArea,
     bio,
-    specialties
+    specialties,
+    facebook_url: facebookUrl,
+    instagram_url: instagramUrl
   };
 
   const supabase = getSupabase();
@@ -370,6 +374,38 @@ export async function removeProfilePhoto(photoUrl: string) {
   revalidatePath("/");
   revalidatePath("/studio");
   revalidatePath("/studio/ustawienia");
+}
+
+export async function addProfileCertificates(formData: FormData) {
+  const newCertificateUrls = getPhotoUrls(formData, "certificateUrls");
+  if (newCertificateUrls.length === 0) {
+    revalidatePath("/studio/profil");
+    return;
+  }
+
+  const supabase = getSupabase();
+  const { data: existing, error: fetchError } = await supabase.from("profile").select("certificate_urls").eq("id", "default").maybeSingle();
+  if (fetchError) throw new Error(`Nie udalo sie pobrac profilu: ${fetchError.message}`);
+
+  const combined = [...(existing?.certificate_urls ?? []), ...newCertificateUrls];
+  const { error } = await supabase.from("profile").update({ certificate_urls: combined }).eq("id", "default");
+  if (error) throw new Error(`Nie udalo sie dodac certyfikatow: ${error.message}`);
+
+  revalidatePath("/");
+  revalidatePath("/studio/profil");
+}
+
+export async function removeProfileCertificate(certificateUrl: string) {
+  const supabase = getSupabase();
+  const { data: existing, error: fetchError } = await supabase.from("profile").select("certificate_urls").eq("id", "default").maybeSingle();
+  if (fetchError) throw new Error(`Nie udalo sie pobrac profilu: ${fetchError.message}`);
+
+  const remaining = (existing?.certificate_urls ?? []).filter((url: string) => url !== certificateUrl);
+  const { error } = await supabase.from("profile").update({ certificate_urls: remaining }).eq("id", "default");
+  if (error) throw new Error(`Nie udalo sie usunac certyfikatu: ${error.message}`);
+
+  revalidatePath("/");
+  revalidatePath("/studio/profil");
 }
 
 export async function updateSettings(formData: FormData) {
