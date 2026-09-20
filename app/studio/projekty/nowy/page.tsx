@@ -22,8 +22,13 @@ export default async function NowyProjektPage() {
             <input name="title" required className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. Artystyczny" />
           </label>
           <label className="block text-sm">
-            Styl / kategoria
-            <input name="style" className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" placeholder="np. Editorial glow" />
+            Rodzaj makijazu
+            <select name="style" defaultValue="" className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3">
+              <option value="">Wybierz rodzaj</option>
+              <option value="ŚLUBNE / DELIKATNE">ŚLUBNE / DELIKATNE</option>
+              <option value="OKAZJONALNE / IMPREZA">OKAZJONALNE / IMPREZA</option>
+              <option value="WIECZOROWE / GLAM">WIECZOROWE / GLAM</option>
+            </select>
           </label>
           <label className="block text-sm">
             Data (etykieta)

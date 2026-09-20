@@ -1,5 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
+import { Facebook, Instagram } from "lucide-react";
 import { Header } from "@/components/Header";
 import { getProfile } from "@/lib/db";
 
@@ -45,8 +47,34 @@ export default async function ArtistProfile() {
                 ))}
               </ul>
             )}
+            {(profile.facebookUrl || profile.instagramUrl) && (
+              <div className="mt-6 flex items-center gap-4">
+                {profile.facebookUrl && (
+                  <Link href={profile.facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-muted hover:text-accent">
+                    <Facebook aria-hidden size={22} />
+                  </Link>
+                )}
+                {profile.instagramUrl && (
+                  <Link href={profile.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted hover:text-accent">
+                    <Instagram aria-hidden size={22} />
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
         </div>
+        {profile.certificates.length > 0 && (
+          <div className="mt-10 border-t border-ink/10 pt-8">
+            <p className="mb-4 text-xs uppercase tracking-[0.08em] text-accent">Certyfikaty</p>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              {profile.certificates.map((certificate, index) => (
+                <div key={certificate} className="relative aspect-[4/5] overflow-hidden rounded-md bg-soft-accent shadow-line">
+                  <Image src={certificate} alt="Certyfikat" fill sizes="(max-width: 640px) 40vw, 200px" className="object-cover" loading={index < 4 ? "eager" : "lazy"} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
     </main>
   );

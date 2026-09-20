@@ -16,6 +16,8 @@ export default async function EdytujProjektPage({ params }: { params: Promise<{ 
 
   const updateWithId = updateProject.bind(null, id);
   const canRemovePhotos = project.photos.length > 1;
+  const styleOptions = ["ŚLUBNE / DELIKATNE", "OKAZJONALNE / IMPREZA", "WIECZOROWE / GLAM"];
+  const hasCustomStyle = project.style && !styleOptions.includes(project.style);
 
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
@@ -69,8 +71,12 @@ export default async function EdytujProjektPage({ params }: { params: Promise<{ 
             <input name="title" required defaultValue={project.title} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
           </label>
           <label className="block text-sm">
-            Styl / kategoria
-            <input name="style" defaultValue={project.style} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
+            Rodzaj makijazu
+            <select name="style" defaultValue={project.style} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3">
+              <option value="">Wybierz rodzaj</option>
+              {hasCustomStyle && <option value={project.style}>{project.style}</option>}
+              {styleOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
           </label>
           <label className="block text-sm">
             Data (etykieta)

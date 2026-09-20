@@ -14,9 +14,9 @@ export default async function Home() {
         <div className="mb-8 grid gap-6 border-b border-ink/10 pb-8 md:grid-cols-[1.1fr_0.9fr] md:items-end">
           <div>
             <p className="mb-2 text-xs uppercase text-accent">Portfolio jednej artystki</p>
-            <h1 className="max-w-3xl font-serif text-5xl font-semibold leading-[0.95] sm:text-7xl">Makijaz pokazany jak editorial, zarzadzany jak studio pracy.</h1>
+            <h1 className="max-w-3xl font-serif text-5xl font-semibold leading-[0.95] sm:text-7xl">Makijaż, który wydobywa Twoje naturalne piękno. Tworzony z pasją, dopracowany w każdym detalu.</h1>
           </div>
-          <p className="max-w-xl text-base leading-7 text-muted">Publiczna czesc zaczyna sie od realizacji. Bez logowania, bez social metryk, bez katalogu fikcyjnych artystow.</p>
+          <p className="max-w-xl text-base leading-7 text-muted">Przestrzeń dedykowana moim realizacjom. Odkryj pełne portfolio podzielone na kategorie, zainspiruj się wybranymi lookami i zobacz efekty pracy z klientkami oraz modelkami.</p>
         </div>
         <PortfolioGrid projects={publicProjects} from="/" />
       </section>
