@@ -33,11 +33,11 @@ export function PortfolioGrid({ projects, from }: { projects: Project[]; from: s
           className="w-full border border-ink/15 bg-white/50 px-3 py-2.5 text-sm sm:max-w-xs"
         />
         {styles.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-4">
             <button
               type="button"
               onClick={() => setStyle(null)}
-              className={`border px-3 py-1.5 text-xs uppercase tracking-wide ${style === null ? "border-accent bg-soft-accent text-ink" : "border-ink/15 text-muted hover:text-ink"}`}
+              className={`border-b-2 pb-0.5 text-xs uppercase tracking-wide ${style === null ? "border-accent font-medium text-ink" : "border-transparent text-muted hover:text-ink"}`}
             >
               Wszystkie
             </button>
@@ -46,7 +46,7 @@ export function PortfolioGrid({ projects, from }: { projects: Project[]; from: s
                 key={s}
                 type="button"
                 onClick={() => setStyle((current) => (current === s ? null : s))}
-                className={`border px-3 py-1.5 text-xs uppercase tracking-wide ${style === s ? "border-accent bg-soft-accent text-ink" : "border-ink/15 text-muted hover:text-ink"}`}
+                className={`border-b-2 pb-0.5 text-xs uppercase tracking-wide ${style === s ? "border-accent font-medium text-ink" : "border-transparent text-muted hover:text-ink"}`}
               >
                 {s}
               </button>
