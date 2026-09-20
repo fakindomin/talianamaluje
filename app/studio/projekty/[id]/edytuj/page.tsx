@@ -67,8 +67,8 @@ export default async function EdytujProjektPage({ params }: { params: Promise<{ 
         )}
         <form action={updateWithId} className="mt-6 max-w-xl space-y-5">
           <label className="block text-sm">
-            Tytul (podpis kafelka)*
-            <input name="title" required defaultValue={project.title} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
+            Tytul (podpis kafelka)
+            <input name="title" defaultValue={project.title} className="mt-2 w-full border border-ink/15 bg-canvas px-3 py-3" />
           </label>
           <label className="block text-sm">
             Rodzaj makijazu
