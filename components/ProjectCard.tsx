@@ -82,8 +82,7 @@ export function ProjectCard({ project, priority = false, from }: { project: Proj
           <div className="pointer-events-none absolute inset-0 tile-text-drift">
             <div className="absolute right-3 top-3 text-xs" style={{ color: project.textColor }}>{project.dateLabel}</div>
             <div className="absolute inset-x-3 bottom-3">
-              <h2 className="font-serif text-2xl font-semibold leading-none" style={{ color: project.textColor }}>{project.title}</h2>
-              <p className="mt-1 text-xs uppercase opacity-90" style={{ color: project.textColor }}>{project.style}</p>
+              <h2 className="text-xs uppercase tracking-wide" style={{ color: project.textColor }}>{project.style}</h2>
             </div>
           </div>
         </article>
