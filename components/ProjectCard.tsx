@@ -79,6 +79,7 @@ export function ProjectCard({ project, priority = false, from }: { project: Proj
         )}
         <article className="relative aspect-[4/5] overflow-hidden rounded-md bg-soft-accent shadow-line">
           {renderLayer(0, true)}
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
           <div className="pointer-events-none absolute inset-0 tile-text-drift">
             <div className="absolute right-3 top-3 text-xs" style={{ color: project.textColor }}>{project.dateLabel}</div>
             <div className="absolute inset-x-3 bottom-3">
